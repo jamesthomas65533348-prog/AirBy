@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel - Naira Token</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #030712;
+      color: white;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #111827;
+      padding: 20px;
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #ffd700;
+      border-bottom: 2px solid #ffd700;
+    }
+    .container {
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+    h2 {
+      color: #ffd700;
+      margin-bottom: 10px;
+    }
+    .section {
+      background: #1f2937;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      box-shadow: 0 0 12px rgba(0, 255, 200, 0.2);
+    }
+    .order {
+      background: #111827;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+    .order span {
+      font-size: 0.9rem;
+    }
+    .btn {
+      background: #ffd700;
+      color: #111827;
+      border: none;
+      padding: 8px 12px;
+      margin: 5px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .btn:hover { opacity: 0.8; }
+    .input {
+      width: 100%;
+      padding: 8px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid #ffd700;
+      background: #0f172a;
+      color: white;
+    }
+    .popup {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ffd700;
+      color: black;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      display: none;
+      z-index: 999;
+    }
+    img.proof-img {
+      width: 100px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #loginSection {
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    /* 🔔 Floating Notification Button */
+    #notifyIcon {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #ffd700;
+      color: #111827;
+      border-radius: 50%;
+      width: 55px;
+      height: 55px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 0 15px #ffd70090;
+      z-index: 999;
+      transition: 0.3s;
+    }
+    #notifyIcon:hover { transform: scale(1.1); }
+
+    /* 📨 Notification Modal */
+    #notifyModal {
+      position: fixed;
+      bottom: 100px;
+      right: 30px;
+      background: #1f2937;
+      border: 2px solid #ffd700;
+      border-radius: 12px;
+      padding: 20px;
+      display: none;
+      flex-direction: column;
+      box-shadow: 0 0 20px #ffd70050;
+      z-index: 999;
+      width: 260px;
+      animation: slideUp 0.3s ease;
+    }
+    #notifyModal textarea {
+      background: #0f172a;
+      color: white;
+      border: 1px solid #ffd700;
+      border-radius: 8px;
+      padding: 8px;
+      resize: none;
+      height: 80px;
+      margin-bottom: 10px;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <header>Admin Panel</header>
+
+  <div class="container" id="adminPanel" style="display:none;">
+    <!-- Deposit & Withdraw Orders -->
+    <div class="section">
+      <h2>Deposit & Withdraw Orders</h2>
+      <div id="ordersList">Loading orders...</div>
+    </div>
+
+    <!-- Token Management -->
+    <div class="section">
+      <h2>Launch New Token</h2>
+      <input type="text" id="tokenName" class="input" placeholder="Token Name">
+      <input type="text" id="tokenSymbol" class="input" placeholder="Symbol (e.g., ZZC)">
+      <input type="number" id="tokenPrice" class="input" placeholder="Current Price (₦)">
+      <input type="file" id="tokenLogoFile" accept="image/*" class="input">
+      <button class="btn" onclick="launchToken()">🚀 Launch Token</button>
+    </div>
+
+    <!-- Token Price Update -->
+    <div class="section">
+      <h2>Token Price Updates</h2>
+      <div id="tokenList">Loading tokens...</div>
+    </div>
+  </div>
+
+  <div id="loginSection">
+    <h2>Admin Login</h2>
+    <input type="email" id="loginEmail" class="input" placeholder="Admin Email">
+    <input type="password" id="loginPassword" class="input" placeholder="Password">
+    <button class="btn" onclick="loginAdmin()">Login</button>
+  </div>
+
+  <div class="popup" id="popup"></div>
+
+  <!-- 🔔 Notification button + modal -->
+  <div id="notifyIcon" onclick="toggleNotifyModal()">🔔</div>
+  <div id="notifyModal">
+    <h3 style="color:#ffd700; margin:0 0 10px;">📢 Broadcast Message</h3>
+    <textarea id="notificationText" placeholder="Type your message..."></textarea>
+    <button class="btn" onclick="publishNotification()">Publish</button>
+  </div>
+
+  <script>
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function showPopup(message) {
+      const popup = document.getElementById('popup');
+      popup.textContent = message;
+      popup.style.display = 'block';
+      setTimeout(() => popup.style.display = 'none', 3000);
+    }
+
+    // 🔐 ADMIN LOGIN
+    async function loginAdmin() {
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) return showPopup("Login failed. Check credentials.");
+
+      const user = data.user;
+      const { data: adminCheck } = await supabaseClient
+        .from('users')
+        .select('is_admin')
+        .eq('auth_id', user.id)
+        .single();
+
+      if (!adminCheck || adminCheck.is_admin !== true) {
+        showPopup("Access Denied. Not an admin account.");
+        await supabaseClient.auth.signOut();
+        return;
+      }
+
+      document.getElementById('loginSection').style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'block';
+      loadOrders();
+      loadTokens();
+      showPopup("Welcome, Admin!");
+    }
+
+    // 🧾 Load Orders (unchanged)
+    async function loadOrders() {
+      const { data: deposits } = await supabaseClient
+        .from('deposits')
+        .select('*')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+
+      const { data: withdrawals } = await supabaseClient
+        .from('withdrawals')
+        .select('*')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+
+      const ordersDiv = document.getElementById('ordersList');
+      ordersDiv.innerHTML = '';
+
+      if ((!deposits || deposits.length === 0) && (!withdrawals || withdrawals.length === 0)) {
+        ordersDiv.textContent = 'No pending orders.';
+        return;
+      }
+
+      deposits?.forEach(dep => {
+        const div = document.createElement('div');
+        div.className = 'order';
+        div.id = `dep-${dep.id}`;
+        div.innerHTML = `
+          <span><b>Deposit Order</b></span>
+          <span>Phone: ${dep.phone_number}</span>
+          <span>Amount: ₦${dep.amount}</span>
+          <img src="${dep.screenshot_url}" class="proof-img" onclick="window.open('${dep.screenshot_url}', '_blank')">
+          <div>
+            <button class="btn" onclick="approveDeposit(${dep.id}, ${dep.amount}, '${dep.phone_number}')">Approve</button>
+            <button class="btn" onclick="rejectDeposit(${dep.id})">Reject</button>
+          </div>`;
+        ordersDiv.appendChild(div);
+      });
+
+      withdrawals?.forEach(wd => {
+        const div = document.createElement('div');
+        div.className = 'order';
+        div.id = `wd-${wd.id}`;
+        div.innerHTML = `
+          <span><b>Withdraw Order</b></span>
+          <span>Phone: ${wd.phone_number}</span>
+          <span>Bank: ${wd.bank_name}</span>
+          <span>Account: ${wd.account_number}</span>
+          <span>Amount: ₦${wd.amount}</span>
+          <div>
+            <button class="btn" onclick="approveWithdraw(${wd.id})">Approve</button>
+            <button class="btn" onclick="rejectWithdraw(${wd.id}, '${wd.phone_number}', ${wd.amount})">Reject</button>
+          </div>`;
+        ordersDiv.appendChild(div);
+      });
+    }
+
+    // ✅ APPROVE DEPOSIT (unchanged)
+    async function approveDeposit(id, amount, phone) {
+      const depAmount = parseFloat(amount);
+      if (isNaN(depAmount) || depAmount <= 0) return showPopup("Invalid deposit amount");
+      const { data: userData } = await supabaseClient.from('users').select('balance').eq('phone_number', phone).single();
+      if (!userData) return showPopup("User not found!");
+      const newBalance = (parseFloat(userData.balance) || 0) + depAmount;
+      await supabaseClient.from('users').update({ balance: newBalance }).eq('phone_number', phone);
+      await supabaseClient.from('deposits').update({ status: 'approved' }).eq('id', id);
+      document.getElementById(`dep-${id}`)?.remove();
+      showPopup(`Deposit ₦${depAmount} approved successfully.`);
+    }
+
+    // ❌ REJECT DEPOSIT (unchanged)
+    async function rejectDeposit(id) {
+      await supabaseClient.from('deposits').update({ status: 'rejected' }).eq('id', id);
+      document.getElementById(`dep-${id}`)?.remove();
+      showPopup('Deposit Rejected!');
+    }
+
+    // ✅ APPROVE WITHDRAW (unchanged)
+    async function approveWithdraw(id) {
+      await supabaseClient.from('withdrawals').update({ status: 'approved' }).eq('id', id);
+      document.getElementById(`wd-${id}`)?.remove();
+      showPopup('Withdraw Approved!');
+    }
+
+    // ❌ REJECT WITHDRAW (unchanged)
+    async function rejectWithdraw(id, phone, amount) {
+      const refundAmount = parseFloat(amount);
+      if (isNaN(refundAmount) || refundAmount <= 0) return showPopup("Invalid refund amount");
+      const { data: userData } = await supabaseClient.from('users').select('balance').eq('phone_number', phone).single();
+      if (!userData) return showPopup("User not found!");
+      const newBalance = (parseFloat(userData.balance) || 0) + refundAmount;
+      await supabaseClient.from('users').update({ balance: newBalance }).eq('phone_number', phone);
+      await supabaseClient.from('withdrawals').update({ status: 'rejected' }).eq('id', id);
+      document.getElementById(`wd-${id}`)?.remove();
+      showPopup(`₦${refundAmount} refunded successfully.`);
+    }
+
+    // 🚀 Launch Token (unchanged)
+    async function launchToken() {
+      const name = document.getElementById('tokenName').value.trim();
+      const symbol = document.getElementById('tokenSymbol').value.trim();
+      const price = parseFloat(document.getElementById('tokenPrice').value);
+      const file = document.getElementById('tokenLogoFile').files[0];
+      if (!name || !symbol || !price || !file) return showPopup("Fill all fields!");
+      const filePath = `token_logos/${Date.now()}_${file.name}`;
+      const { error: uploadError } = await supabaseClient.storage.from('proofs').upload(filePath, file);
+      if (uploadError) return showPopup("Logo upload failed!");
+      const { data: publicUrlData } = supabaseClient.storage.from('proofs').getPublicUrl(filePath);
+      const logoUrl = publicUrlData.publicUrl;
+      const { error: insertError } = await supabaseClient.from('tokens').insert({
+        name, symbol, logo_url: logoUrl, current_price: price, status: 'active', created_at: new Date()
+      });
+      if (insertError) return showPopup("Error launching token!");
+      showPopup("Token launched!");
+      loadTokens();
+    }
+
+    // 🪙 Load Tokens (unchanged)
+    async function loadTokens() {
+      const { data: tokens } = await supabaseClient.from('tokens').select('*').order('created_at', { ascending: false });
+      const div = document.getElementById('tokenList');
+      div.innerHTML = '';
+      if (!tokens || tokens.length === 0) {
+        div.textContent = 'No tokens launched yet.';
+        return;
+      }
+      tokens.forEach(tk => {
+        const el = document.createElement('div');
+        el.className = 'order';
+        el.innerHTML = `
+          <span><b>${tk.name} (${tk.symbol})</b></span>
+          <span>Current Price: ₦${tk.current_price}</span>
+          <input type="number" class="input" id="price_${tk.id}" placeholder="New Price (₦)">
+          <button class="btn" onclick="updatePrice(${tk.id})">Update Price</button>`;
+        div.appendChild(el);
+      });
+    }
+
+    // 💰 Update Token Price (unchanged)
+    async function updatePrice(id) {
+      const newPrice = parseFloat(document.getElementById(`price_${id}`).value);
+      if (!newPrice) return showPopup('Enter valid price!');
+      await supabaseClient.from('tokens').update({ current_price: newPrice }).eq('id', id);
+      showPopup('Price updated!');
+      loadTokens();
+    }
+
+    // 📨 --- NOTIFICATION FEATURE ---
+    function toggleNotifyModal() {
+      const modal = document.getElementById('notifyModal');
+      modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    async function publishNotification() {
+      const msg = document.getElementById('notificationText').value.trim();
+      if (!msg) return showPopup("Enter a message first!");
+      const { error } = await supabaseClient.from('notifications').insert({
+        message: msg,
+        created_at: new Date(),
+        expire_at: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        is_read: false
+      });
+      if (error) return showPopup("Error publishing notification");
+      document.getElementById('notificationText').value = '';
+      toggleNotifyModal();
+      showPopup("Notification sent!");
+    }
+  </script>
+</body>
+</html>

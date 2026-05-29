@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AirBy - Login</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #000000;
+      color: #ffffff;
+      overflow-x: hidden;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 414px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .brand-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .brand-logo {
+      font-size: 44px;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+
+    .brand-logo .accent-tick {
+      color: #0066ff;
+      font-weight: 900;
+      margin-left: 1px;
+    }
+
+    .brand-header p {
+      font-size: 15px;
+      color: #666666;
+      margin: 0;
+    }
+
+    .input-group {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .input-row {
+      position: relative;
+      margin-bottom: 14px;
+      border-radius: 14px;
+      padding: 1.5px;
+      background: transparent;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    input {
+      width: 100%;
+      padding: 16px;
+      background: #0b0b0c;
+      border: 1.5px solid #1c1c1e;
+      border-radius: 13px;
+      font-size: 16px;
+      color: #ffffff;
+      outline: none;
+      transition: border-color 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
+      -webkit-user-select: text;
+      user-select: text;
+    }
+
+    input:focus {
+      border-color: #0066ff;
+      transform: scale(1.015);
+    }
+
+    input:active {
+      transform: scale(0.97);
+    }
+
+    input::placeholder {
+      color: #48484a;
+    }
+
+    .neon-blue-glow input {
+      border-color: #0066ff !important;
+      box-shadow: 0 0 12px rgba(0, 102, 255, 0.4);
+    }
+
+    .neon-confirming {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .neon-confirming::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(transparent, transparent, transparent, #0066ff);
+      animation: rotateBorder 1.2s linear infinite;
+      z-index: 1;
+    }
+
+    .neon-confirming input {
+      border-color: transparent !important;
+      position: relative;
+      z-index: 2;
+    }
+
+    @keyframes rotateBorder {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .neon-green-glow input {
+      border-color: #34c759 !important;
+      box-shadow: 0 0 12px rgba(52, 199, 89, 0.4);
+    }
+
+    .neon-red-glow input {
+      border-color: #ff3b30 !important;
+      box-shadow: 0 0 12px rgba(255, 59, 48, 0.4);
+    }
+
+    .shake-row {
+      animation: shakePhysics 0.4s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @keyframes shakePhysics {
+      10%, 90% { transform: translate3d(-2px, 0, 0); }
+      20%, 80% { transform: translate3d(4px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+      40%, 60% { transform: translate3d(6px, 0, 0); }
+    }
+
+    .btn-wrapper {
+      max-height: 0;
+      opacity: 0;
+      width: 100%;
+      overflow: hidden;
+      transform: translateY(15px) scale(0.95);
+      transition: max-height 0.4s ease, opacity 0.3s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .btn-wrapper.reveal {
+      max-height: 90px;
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      margin-top: 10px;
+    }
+
+    .action-btn {
+      width: 100%;
+      padding: 16px;
+      background-color: #ffffff;
+      color: #000000;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease;
+    }
+
+    .action-btn:active {
+      transform: scale(0.94);
+      background-color: #e5e5e5;
+    }
+
+    .loader-spinner {
+      width: 20px;
+      height: 20px;
+      border: 2.5px solid #000000;
+      border-top: 2.5px solid transparent;
+      border-radius: 50%;
+      animation: spinDevice 0.75s linear infinite;
+      display: none;
+    }
+
+    @keyframes spinDevice {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .footer-link {
+      margin-top: 24px;
+      font-size: 15px;
+      color: #666666;
+    }
+
+    .footer-link a {
+      color: #0066ff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .airby-toast {
+      position: fixed;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 14px 28px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffffff;
+      box-shadow: 0px 12px 30px rgba(0, 0, 0, 0.7);
+      z-index: 5000;
+      transition: top 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .airby-toast.show {
+      top: 24px;
+    }
+
+    .airby-toast.error { background-color: #ff3b30; }
+    .airby-toast.success { background-color: #34c759; }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <div class="brand-header">
+      <div class="brand-logo">AirBy<span class="accent-tick">'</span></div>
+      <p>Log in to your secure ecosystem</p>
+    </div>
+
+    <div class="input-group">
+      <div class="input-row" id="email_row">
+        <input type="email" id="email" placeholder="Email Address" autocomplete="off">
+      </div>
+
+      <div class="input-row" id="password_row">
+        <input type="password" id="password" placeholder="Password">
+      </div>
+    </div>
+
+    <div class="btn-wrapper" id="btn_wrapper">
+      <button class="action-btn" onclick="startLoginFlow()">
+        <span id="btn_text">Log In</span>
+        <div class="loader-spinner" id="btn_loader"></div>
+      </button>
+    </div>
+
+    <div class="footer-link">
+      Don't have an account? <a href="signup.html">Sign Up</a>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+
+  <script>
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const btnWrapper = document.getElementById("btn_wrapper");
+    const passwordRow = document.getElementById("password_row");
+
+    function showPopup(message, type = "error") {
+      let toast = document.querySelector('.airby-toast');
+
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.className = 'airby-toast';
+        document.body.appendChild(toast);
+      }
+
+      toast.className = `airby-toast ${type}`;
+      toast.innerText = message;
+
+      setTimeout(() => toast.classList.add('show'), 50);
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function evaluateInputs() {
+      const emailVal = emailInput.value.trim();
+      const passVal = passwordInput.value;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (emailRegex.test(emailVal) && passVal.length >= 6) {
+        btnWrapper.classList.add("reveal");
+      } else {
+        btnWrapper.classList.remove("reveal");
+      }
+    }
+
+    emailInput.addEventListener("input", evaluateInputs);
+    passwordInput.addEventListener("input", evaluateInputs);
+
+    function clearAnimationClasses() {
+      passwordRow.classList.remove(
+        "neon-blue-glow",
+        "neon-confirming",
+        "neon-green-glow",
+        "neon-red-glow",
+        "shake-row"
+      );
+    }
+
+    function resetButtonUI() {
+      document.getElementById("btn_text").style.display = "block";
+      document.getElementById("btn_loader").style.display = "none";
+    }
+
+    async function startLoginFlow() {
+      const email = emailInput.value.trim().toLowerCase();
+      const password = passwordInput.value.trim();
+
+      if (!email || !password) {
+        showPopup("Please fill all required fields", "error");
+        return;
+      }
+
+      clearAnimationClasses();
+      passwordRow.classList.add("neon-blue-glow");
+
+      setTimeout(async () => {
+
+        passwordRow.classList.remove("neon-blue-glow");
+        passwordRow.classList.add("neon-confirming");
+
+        document.getElementById("btn_text").style.display = "none";
+        document.getElementById("btn_loader").style.display = "block";
+
+        try {
+
+          // CHECK USER
+          const { data, error } = await supabaseClient
+            .from('users')
+            .select('*')
+            .eq('email', email)
+            .eq('password', password)
+            .maybeSingle();
+
+          setTimeout(async () => {
+
+            passwordRow.classList.remove("neon-confirming");
+
+            if (error) {
+              console.error(error);
+
+              passwordRow.classList.add("neon-red-glow");
+              passwordRow.classList.add("shake-row");
+
+              showPopup("Authentication mistake. Try again.", "error");
+
+              resetButtonUI();
+              return;
+            }
+
+            if (!data) {
+
+              passwordRow.classList.add("neon-red-glow");
+              passwordRow.classList.add("shake-row");
+
+              showPopup("Invalid email address or password.", "error");
+
+              setTimeout(() => {
+                passwordRow.classList.remove("shake-row");
+                passwordInput.value = "";
+                clearAnimationClasses();
+                evaluateInputs();
+              }, 800);
+
+              resetButtonUI();
+              return;
+            }
+
+            // BLOCK FREEZED USERS
+            if (data.account_status === "freezed") {
+
+              passwordRow.classList.add("neon-red-glow");
+              passwordRow.classList.add("shake-row");
+
+              showPopup("Your account has been freezed.", "error");
+
+              resetButtonUI();
+              return;
+            }
+
+            // GENERATE SECURE SESSION TOKEN
+            const sessionToken =
+              crypto.randomUUID() +
+              "-" +
+              Date.now() +
+              "-" +
+              Math.random().toString(36).substring(2);
+
+            // SAVE SESSION INTO DATABASE
+            const { error: sessionError } = await supabaseClient
+              .from('users')
+              .update({
+                session_token: sessionToken,
+                last_login_at: new Date().toISOString()
+              })
+              .eq('email', email);
+
+            if (sessionError) {
+
+              passwordRow.classList.add("neon-red-glow");
+
+              showPopup("Unable to initialize secure session.", "error");
+
+              resetButtonUI();
+              return;
+            }
+
+            // SAVE SESSION LOCALLY
+            localStorage.setItem("user_email", email);
+            localStorage.setItem("session_token", sessionToken);
+
+            passwordRow.classList.add("neon-green-glow");
+
+            showPopup("Welcome back! Entering hub...", "success");
+
+            setTimeout(() => {
+              window.location.href = "index.html";
+            }, 1500);
+
+          }, 1000);
+
+        } catch (err) {
+
+          console.error(err);
+
+          passwordRow.classList.remove("neon-confirming");
+
+          passwordRow.classList.add("neon-red-glow");
+
+          showPopup("An unexpected processing failure occurred.", "error");
+
+          resetButtonUI();
+        }
+
+      }, 300);
+    }
+  </script>
+
+</body>
+</html>

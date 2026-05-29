@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>History - NAIRA TOKEN</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      background-color: #000;
+      color: #FFD700;
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    h2 {
+      margin-top: 60px;
+      text-align: center;
+    }
+
+    .card {
+      border-radius: 20px;
+      box-shadow: 0 0 25px rgba(0,0,0,0.5);
+      padding: 25px;
+      width: 90%;
+      max-width: 420px;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 20px;
+      margin-bottom: 25px;
+      transition: all 0.4s ease;
+      text-align: center;
+    }
+
+    .card:hover { transform: scale(1.05); }
+
+    .deposit-card {
+      background: linear-gradient(145deg, #006400, #00FF7F);
+      box-shadow: 0 0 25px rgba(0,255,127,0.6);
+    }
+
+    .withdraw-card {
+      background: linear-gradient(145deg, #8B0000, #FF4500);
+      box-shadow: 0 0 25px rgba(255,69,0,0.6);
+    }
+
+    .section {
+      width: 95%;
+      max-width: 500px;
+      background: #111;
+      border: 2px solid #FFD700;
+      border-radius: 15px;
+      padding: 15px;
+      box-shadow: 0 0 15px #FFD70050;
+      margin-top: 20px;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.5s ease;
+      display: none;
+    }
+
+    .section.show {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .section h3 {
+      border-bottom: 1px solid #FFD700;
+      padding-bottom: 5px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .record {
+      background: #000;
+      border: 1px solid #FFD70080;
+      border-radius: 10px;
+      padding: 10px;
+      margin: 8px 0;
+      font-size: 14px;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .status {
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status img {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .status.Pending { color: orange; text-shadow: 0 0 8px orange; }
+    .status.Approved { color: lightgreen; text-shadow: 0 0 8px lightgreen; }
+    .status.Rejected { color: red; text-shadow: 0 0 8px red; }
+
+    a.proof-link {
+      color: #FFD700;
+      text-decoration: underline;
+    }
+
+    .popup {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #111;
+      color: #FFD700;
+      border: 1px solid #FFD700;
+      padding: 10px 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #FFD70080;
+      opacity: 0;
+      animation: fadeInOut 3s forwards;
+      z-index: 1000;
+    }
+
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateY(-10px); }
+      10% { opacity: 1; transform: translateY(0); }
+      90% { opacity: 1; }
+      100% { opacity: 0; transform: translateY(-10px); }
+    }
+
+    .back-btn {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: #FFD700;
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      padding: 8px 15px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 10px #FFD70080;
+      transition: 0.3s;
+    }
+
+    .back-btn:hover {
+      background: #000;
+      color: #FFD700;
+      border: 1px solid #FFD700;
+    }
+
+    .inner-back {
+      display: block;
+      background: #FFD700;
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 20px;
+      margin: 10px auto;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .inner-back:hover {
+      background: #000;
+      color: #FFD700;
+      border: 1px solid #FFD700;
+    }
+  </style>
+</head>
+<body>
+
+  <button class="back-btn" onclick="window.location.href='home.html'">← Home</button>
+
+  <h2>Transaction History</h2>
+
+  <div class="card deposit-card" onclick="openSection('deposit')">💰 Deposit History</div>
+  <div class="card withdraw-card" onclick="openSection('withdraw')">💸 Withdrawal History</div>
+
+  <div class="section" id="depositSection">
+    <h3>💰 Deposit History</h3>
+    <div id="depositList">Loading...</div>
+    <button class="inner-back" onclick="closeSection()">← Back</button>
+  </div>
+
+  <div class="section" id="withdrawSection">
+    <h3>💸 Withdrawal History</h3>
+    <div id="withdrawList">Loading...</div>
+    <button class="inner-back" onclick="closeSection()">← Back</button>
+  </div>
+
+  <script src="config.js"></script>
+  <script>
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function showPopup(msg) {
+      const popup = document.createElement('div');
+      popup.className = 'popup';
+      popup.innerText = msg;
+      document.body.appendChild(popup);
+      setTimeout(() => popup.remove(), 3000);
+    }
+
+    async function getUserPhone() {
+      let phone_number = localStorage.getItem('phone_number');
+      if (phone_number) return phone_number.trim();
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (user && user.phone) {
+        localStorage.setItem('phone_number', user.phone);
+        return user.phone;
+      }
+      return null;
+    }
+
+    async function loadHistory() {
+      const phone_number = await getUserPhone();
+      if (!phone_number) {
+        showPopup('Please login first!');
+        setTimeout(() => window.location.href = "login.html", 1500);
+        return;
+      }
+
+      const depositList = document.getElementById('depositList');
+      const withdrawList = document.getElementById('withdrawList');
+      depositList.innerHTML = 'Loading...';
+      withdrawList.innerHTML = 'Loading...';
+
+      const cleanPhone = phone_number.replace(/\s|\+|-/g, '');
+
+      const { data: deposits } = await supabaseClient
+        .from('deposits')
+        .select('*')
+        .or(`phone_number.ilike.%${cleanPhone}%,phone_number.ilike.%${cleanPhone.replace(/^0/, '+234')}%`)
+        .order('created_at', { ascending: false });
+
+      depositList.innerHTML = deposits?.length ? '' : '<p>No deposit history yet.</p>';
+      deposits?.forEach(dep => addDepositRecord(dep));
+
+      const { data: withdrawals } = await supabaseClient
+        .from('withdrawals')
+        .select('*')
+        .or(`phone_number.ilike.%${cleanPhone}%,phone_number.ilike.%${cleanPhone.replace(/^0/, '+234')}%`)
+        .order('created_at', { ascending: false });
+
+      withdrawList.innerHTML = withdrawals?.length ? '' : '<p>No withdrawal history yet.</p>';
+      withdrawals?.forEach(wit => addWithdrawRecord(wit));
+
+      listenForChanges('deposits', cleanPhone, addDepositRecord);
+      listenForChanges('withdrawals', cleanPhone, addWithdrawRecord);
+    }
+
+    function statusImage(status) {
+      if (status === 'Approved') return 'dot-green.png';
+      if (status === 'Pending') return 'dot-yellow.png';
+      return 'dot-red.png';
+    }
+
+    function addDepositRecord(dep) {
+  const depositList = document.getElementById('depositList');
+  let div = document.getElementById(`dep-${dep.id}`);
+  if (!div) {
+    div = document.createElement('div');
+    div.id = `dep-${dep.id}`;
+    div.className = 'record';
+    depositList.appendChild(div);
+  }
+
+  // Choose image based on status
+  let dotImage = 'dot-red.png'; // default
+  if (dep.status.toLowerCase() === 'approved') dotImage = 'dot-green.png';
+  else if (dep.status.toLowerCase() === 'pending') dotImage = 'dot-yellow.png';
+
+  div.innerHTML = `
+    <p><b>Amount:</b> ₦${Number(dep.amount).toLocaleString()}</p>
+    <p><b>Status:</b>
+      <span class="status ${dep.status}">
+        <img src="${dotImage}" class="circle" width="10" height="10" /> ${dep.status}
+      </span>
+    </p>
+    <p><b>Date:</b> ${new Date(dep.created_at).toLocaleString()}</p>
+    ${dep.screenshot_url ? `<p><a href="${dep.screenshot_url}" class="proof-link" target="_blank">View Proof</a></p>` : ''}
+  `;
+}
+
+    function addWithdrawRecord(wit) {
+  const withdrawList = document.getElementById('withdrawList');
+  let div = document.getElementById(`wit-${wit.id}`);
+  if (!div) {
+    div = document.createElement('div');
+    div.id = `wit-${wit.id}`;
+    div.className = 'record';
+    withdrawList.appendChild(div);
+  }
+
+  // Choose image based on status
+  let dotImage = 'dot-red.png'; // default
+  if (wit.status.toLowerCase() === 'approved') dotImage = 'dot-green.png';
+  else if (wit.status.toLowerCase() === 'pending') dotImage = 'dot-yellow.png';
+
+  div.innerHTML = `
+    <p><b>Amount:</b> ₦${Number(wit.amount).toLocaleString()}</p>
+    <p><b>Status:</b>
+      <span class="status ${wit.status}">
+        <img src="${dotImage}" class="circle" width="10" height="10" /> ${wit.status}
+      </span>
+    </p>
+    <p><b>Bank:</b> ${wit.bank_name}</p>
+    <p><b>Account:</b> ${wit.account_number}</p>
+    <p><b>Date:</b> ${new Date(wit.created_at).toLocaleString()}</p>
+  `;
+}
+
+    function listenForChanges(table, phone, updateFunc) {
+      supabaseClient
+        .channel(`${table}-changes`)
+        .on('postgres_changes', { event: '*', schema: 'public', table },
+          payload => {
+            const newRecord = payload.new;
+            if (!newRecord || !newRecord.phone_number) return;
+            const clean = newRecord.phone_number.replace(/\s|\+|-/g, '');
+            if (clean.includes(phone) || clean.includes(phone.replace(/^0/, '234'))) {
+              updateFunc(newRecord);
+              showPopup(`${table === 'deposits' ? 'Deposit' : 'Withdrawal'} updated: ${newRecord.status}`);
+            }
+          }
+        )
+        .subscribe();
+    }
+
+    function openSection(type) {
+      document.querySelectorAll('.card').forEach(c => c.style.display = 'none');
+      const section = document.getElementById(type === 'deposit' ? 'depositSection' : 'withdrawSection');
+      section.classList.add('show');
+    }
+
+    function closeSection() {
+      document.querySelectorAll('.card').forEach(c => c.style.display = 'flex');
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('show'));
+    }
+
+    loadHistory();
+  </script>
+</body>
+</html>

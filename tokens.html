@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tokens - NAIRA TOKEN</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <script>
+    const SUPABASE_URL = "https://vwcknviabngqvncggeac.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ3Y2tudmlhYm5ncXZuY2dnZWFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4NDYyODEsImV4cCI6MjA3NTQyMjI4MX0.R5P7kyaiIQ91AwMcjUbovqUrAoYbuXyDnIgQK9H_wIk";
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.2"></script>
+
+  <style>
+    :root { --bg:#000; --card:#111; --gold:#FFD700; --muted:#FFD70080; }
+    body {
+      margin:0;font-family:'Poppins',sans-serif;background:var(--bg);color:var(--gold);
+      padding:18px;min-height:100vh;box-sizing:border-box;
+    }
+    .header {display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .back {
+      background:var(--gold);color:#000;border-radius:8px;padding:8px 12px;border:none;
+      font-weight:600;cursor:pointer;box-shadow:0 0 10px var(--muted)
+    }
+    h1 {margin:14px 0 20px 0;font-size:20px}
+    .search-box {
+      width:100%;max-width:720px;margin:10px auto 25px auto;display:flex;justify-content:center;
+    }
+    .search-input {
+      width:100%;background:var(--card);border:1px solid var(--gold);
+      border-radius:10px;padding:10px 15px;color:var(--gold);font-size:15px;
+      box-shadow:0 0 10px var(--muted);outline:none;
+    }
+    .search-input::placeholder{color:var(--muted);}
+    .list {
+      max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:12px;
+      padding-bottom:120px;overflow:auto;
+    }
+    .card {
+      display:flex;align-items:center;justify-content:space-between;background:var(--card);
+      border:2px solid var(--gold);padding:12px;border-radius:14px;
+      box-shadow:0 0 16px var(--muted);cursor:pointer;transition:transform .14s;
+    }
+    .card:hover {transform:scale(1.01)}
+    .left {display:flex;align-items:center;gap:12px}
+    .logo {
+      width:56px;height:56px;border-radius:10px;background:#000;
+      display:flex;align-items:center;justify-content:center;font-size:20px;
+      border:1px solid var(--muted);overflow:hidden;
+    }
+    .token-info {display:flex;flex-direction:column}
+    .name {font-weight:600}
+    .symbol {font-size:13px;opacity:.9}
+    .price {font-weight:700}
+    .small-muted {font-size:12px;opacity:.85}
+    .total-assets-btn {
+      position:fixed;bottom:22px;right:20px;background:var(--card);
+      border:2px solid var(--gold);color:var(--gold);padding:12px 14px;
+      border-radius:999px;cursor:pointer;box-shadow:0 0 16px var(--muted);font-weight:700;
+    }
+    .total-assets-btn:hover {
+      background:var(--gold);color:#000;transform:scale(1.04);
+    }
+    .modal-back {
+      position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;
+      align-items:center;justify-content:center;z-index:9999;
+    }
+    .modal {
+      background:var(--card);border:2px solid var(--gold);padding:18px;
+      border-radius:12px;width:92%;max-width:420px;box-shadow:0 0 20px var(--muted);
+      color:var(--gold);
+    }
+    .input, .btn {
+      width:100%;box-sizing:border-box;padding:10px;border-radius:10px;
+      border:1px solid var(--gold);background:transparent;color:var(--gold);
+      margin-top:10px;font-size:15px;
+    }
+    .btn {
+      background:var(--gold);color:#000;font-weight:700;border:none;cursor:pointer;
+    }
+    .btn:disabled {opacity:.6;cursor:not-allowed}
+    .popup {
+      position:fixed;top:20px;left:50%;transform:translateX(-50%);
+      background:var(--card);color:var(--gold);border:1px solid var(--gold);
+      padding:10px 20px;border-radius:10px;box-shadow:0 0 10px var(--muted);
+      opacity:0;animation:fadeInOut 3s forwards;z-index:10000;
+    }
+    @keyframes fadeInOut {
+      0%{opacity:0;transform:translateX(-50%) translateY(-10px)}
+      10%{opacity:1;transform:translateX(-50%) translateY(0)}
+      90%{opacity:1}
+      100%{opacity:0;transform:translateX(-50%) translateY(-10px)}
+    }
+    .empty {
+      opacity:.85;text-align:center;padding:18px;border-radius:12px;
+      border:1px dashed var(--muted);margin-top:20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <button class="back" onclick="location.href='home.html'">← Home</button>
+    <h1>Available Tokens</h1>
+    <div style="width:68px"></div>
+  </div>
+
+  <div class="search-box">
+    <input id="searchInput" class="search-input" type="text" placeholder="🔍 Search tokens by name or symbol..." />
+  </div>
+
+  <div id="list" class="list"><div class="empty">Loading tokens...</div></div>
+
+  <button class="total-assets-btn" onclick="location.href='total-assets.html'">💰 Total Assets</button>
+
+  <!-- Modal -->
+  <div id="modalBack" class="modal-back">
+    <div class="modal" id="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div id="modalName" style="font-weight:700"></div>
+          <div id="modalSymbol" class="small-muted"></div>
+        </div>
+        <div id="modalPrice" style="font-weight:800"></div>
+      </div>
+
+      <input id="buyAmountNaira" class="input" type="number" placeholder="Enter Naira amount (₦)" min="1" />
+      <div id="calculatedTokens" class="small-muted" style="margin-top:8px">You will receive: 0 tokens</div>
+      <button id="buyBtn" class="btn">Buy</button>
+      <button style="margin-top:8px" class="input" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const phone = localStorage.getItem("phone_number");
+
+    // 🟢 Improved Auto Rank Updater
+    async function autoUpdateRank(phone) {
+      const { data: tokens, error } = await supabaseClient
+        .from('user_token')
+        .select('amount_spent')
+        .eq('phone_number', phone);
+
+      if (error || !tokens) return console.error('Rank fetch error:', error);
+
+      const totalSpent = tokens.reduce((sum, t) => sum + Number(t.amount_spent || 0), 0);
+
+      let newRank = 'Silver';
+      if (totalSpent >= 1000000) newRank = 'Master';
+      else if (totalSpent >= 300000) newRank = 'Diamond';
+      else if (totalSpent >= 70000) newRank = 'Gold';
+      else if (totalSpent >= 20000) newRank = 'Bronze';
+      else if (totalSpent >= 7000) newRank = 'Rookie';
+
+      // Check if rank_progress already exists
+      const { data: existingRank, error: fetchErr } = await supabaseClient
+        .from('rank_progress')
+        .select('phone_number')
+        .eq('phone_number', phone)
+        .maybeSingle();
+
+      if (fetchErr) console.error('Rank check error:', fetchErr);
+
+      if (existingRank) {
+        await supabaseClient
+          .from('rank_progress')
+          .update({
+            current_rank: newRank,
+            rank_start: totalSpent,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('phone_number', phone);
+      } else {
+        await supabaseClient.from('rank_progress').insert([{
+          phone_number: phone,
+          current_rank: newRank,
+          rank_start: totalSpent,
+          last_reset: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }]);
+      }
+
+      console.log(`Rank updated → ${newRank} (${totalSpent.toLocaleString()}₦)`);
+    }
+
+    function showPopup(msg) {
+      const p = document.createElement("div");
+      p.className = "popup";
+      p.innerText = msg;
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 3000);
+    }
+
+    const list = document.getElementById("list");
+    const modalBack = document.getElementById("modalBack");
+    const modalName = document.getElementById("modalName");
+    const modalSymbol = document.getElementById("modalSymbol");
+    const modalPrice = document.getElementById("modalPrice");
+    const buyAmountNaira = document.getElementById("buyAmountNaira");
+    const calculatedTokens = document.getElementById("calculatedTokens");
+    const buyBtn = document.getElementById("buyBtn");
+    const searchInput = document.getElementById("searchInput");
+
+    let tokens = [];
+    let filteredTokens = [];
+    let selectedToken = null;
+
+    async function fetchTokens() {
+      const { data, error } = await supabaseClient
+        .from("tokens")
+        .select("*")
+        .eq("status", "active")
+        .order("updated_at", { ascending: false });
+      if (error) return showPopup("Error loading tokens");
+      tokens = data || [];
+      filteredTokens = [...tokens];
+      renderList();
+    }
+
+    function renderList() {
+      list.innerHTML = "";
+      if (!filteredTokens.length) return (list.innerHTML = '<div class="empty">No tokens found.</div>');
+      filteredTokens.forEach(t => {
+        const c = document.createElement("div");
+        c.className = "card";
+        c.onclick = () => openModal(t);
+        const left = document.createElement("div");
+        left.className = "left";
+        const logo = document.createElement("div");
+        logo.className = "logo";
+        if (t.logo_url) {
+          const img = document.createElement("img");
+          img.src = t.logo_url;
+          img.style.width = "100%";
+          img.style.height = "100%";
+          img.style.objectFit = "cover";
+          logo.appendChild(img);
+        } else logo.innerText = (t.symbol || "TK").slice(0, 3).toUpperCase();
+
+        const info = document.createElement("div");
+        info.className = "token-info";
+        info.innerHTML = `<div class='name'>${t.name}</div><div class='symbol'>${t.symbol}</div>`;
+        left.append(logo, info);
+
+        const price = document.createElement("div");
+        price.className = "price";
+        price.innerText = `₦${Number(t.current_price).toLocaleString()}`;
+        c.append(left, price);
+        list.appendChild(c);
+      });
+    }
+
+    searchInput.addEventListener("input", () => {
+      const q = searchInput.value.trim().toLowerCase();
+      filteredTokens = tokens.filter(t =>
+        t.name.toLowerCase().includes(q) || t.symbol.toLowerCase().includes(q)
+      );
+      renderList();
+    });
+
+    function openModal(token) {
+      selectedToken = token;
+      modalName.innerText = token.name;
+      modalSymbol.innerText = token.symbol;
+      modalPrice.innerText = `₦${Number(token.current_price).toLocaleString()}`;
+      buyAmountNaira.value = "";
+      calculatedTokens.innerText = "You will receive: 0 tokens";
+      modalBack.style.display = "flex";
+    }
+
+    function closeModal() {
+      modalBack.style.display = "none";
+      selectedToken = null;
+    }
+
+    buyAmountNaira.addEventListener("input", () => {
+      const v = parseFloat(buyAmountNaira.value) || 0;
+      const qty = selectedToken && selectedToken.current_price > 0 ? v / Number(selectedToken.current_price) : 0;
+      calculatedTokens.innerText = `You will receive: ${qty ? qty.toFixed(8) : 0} ${selectedToken ? selectedToken.symbol : ""}`;
+    });
+
+    modalBack.addEventListener("click", e => { if (e.target === modalBack) closeModal(); });
+
+    buyBtn.addEventListener("click", async () => {
+      if (!selectedToken) return;
+      const nairaAmount = parseFloat(buyAmountNaira.value);
+      if (!nairaAmount || nairaAmount <= 0) return showPopup("Enter a valid amount");
+
+      try {
+        const { data: user, error: userError } = await supabaseClient
+          .from("users")
+          .select("balance")
+          .eq("phone_number", phone)
+          .single();
+
+        if (userError || !user) return showPopup("Error verifying balance");
+
+        if (user.balance < nairaAmount) return showPopup("Insufficient balance");
+
+        const tokensToReceive = nairaAmount / Number(selectedToken.current_price);
+
+        const { data: existing } = await supabaseClient
+          .from("user_token")
+          .select("*")
+          .eq("phone_number", phone)
+          .eq("token_id", selectedToken.id)
+          .maybeSingle();
+
+        if (existing) {
+          await supabaseClient.from("user_token")
+            .update({
+              quantity: existing.quantity + tokensToReceive,
+              amount_spent: existing.amount_spent + nairaAmount,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", existing.id);
+        } else {
+          await supabaseClient.from("user_token").insert([{
+            phone_number: phone,
+            token_id: selectedToken.id,
+            quantity: tokensToReceive,
+            amount_spent: nairaAmount,
+          }]);
+        }
+
+        await supabaseClient
+          .from("users")
+          .update({ balance: user.balance - nairaAmount })
+          .eq("phone_number", phone);
+
+        // 🟢 Update rank automatically after buy
+        await autoUpdateRank(phone);
+
+        showPopup(`You bought ${tokensToReceive.toFixed(6)} ${selectedToken.symbol}`);
+        closeModal();
+      } catch (e) {
+        showPopup("Something went wrong. Try again.");
+      }
+    });
+
+    fetchTokens();
+    setInterval(fetchTokens, 15000);
+  </script>
+</body>
+</html>

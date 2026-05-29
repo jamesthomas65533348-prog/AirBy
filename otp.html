@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AirBy - Verification</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  
+  <style>
+    /* Premium AirBy AMOLED Theme Specifications */
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #000000;
+      color: #ffffff;
+      overflow: hidden;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 414px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    .brand-header {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+
+    .brand-logo {
+      font-size: 44px;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      color: #ffffff;
+      margin-bottom: 6px;
+    }
+
+    .brand-logo .accent-tick {
+      color: #0066ff;
+      font-weight: 900;
+      margin-left: 1px;
+    }
+
+    .brand-header p {
+      font-size: 15px;
+      color: #ffffff;
+      margin: 0;
+      line-height: 1.5;
+      padding: 0 10px;
+    }
+
+    .brand-header .user-name {
+      color: #0066ff;
+      font-weight: 700;
+      text-transform: capitalize;
+    }
+
+    /* Premium Kinetic Input & Border Chase Stack Frame */
+    .input-group {
+      width: 100%;
+      margin-bottom: 20px;
+      position: relative;
+      border-radius: 14px;
+      padding: 1.5px;
+      background: transparent;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* Advanced CSS Track Ring Engine */
+    .input-group::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(transparent, transparent, transparent, #0066ff);
+      transition: opacity 0.3s ease;
+      opacity: 0;
+      animation: rotateBorder 1.5s linear infinite;
+      z-index: 1;
+    }
+
+    @keyframes rotateBorder {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Dynamic Border State Control Layering */
+    .input-group.chasing::before {
+      opacity: 1;
+    }
+
+    .input-group.error-shake {
+      animation: shakePhysics 0.4s cubic-bezier(.36,.07,.19,.97) both;
+      background: #ff3b30;
+      box-shadow: 0 0 15px rgba(255, 59, 48, 0.5);
+    }
+
+    .input-group.success-swallow {
+      transform: scale(0);
+      opacity: 0;
+    }
+
+    input {
+      width: 100%;
+      padding: 18px;
+      background: #0b0b0c;
+      border: 1.5px solid #1c1c1e;
+      border-radius: 13px;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 8px;
+      text-align: center;
+      color: #ffffff;
+      outline: none;
+      position: relative;
+      z-index: 2;
+      transition: border-color 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      -webkit-user-select: text;
+      user-select: text;
+    }
+
+    .input-group.chasing input {
+      border-color: transparent !important;
+    }
+
+    input:focus {
+      border-color: #0066ff;
+      transform: scale(1.015);
+    }
+
+    input::placeholder {
+      color: #48484a;
+      font-size: 18px;
+      letter-spacing: normal;
+      font-weight: normal;
+    }
+
+    /* Premium Dynamic Action Button Container Frame */
+    .btn-wrapper {
+      max-height: 0;
+      opacity: 0;
+      width: 100%;
+      overflow: hidden;
+      transform: translateY(15px) scale(0.95);
+      transition: max-height 0.4s ease, opacity 0.3s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      margin-bottom: 20px;
+    }
+
+    .btn-wrapper.reveal {
+      max-height: 90px;
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .action-btn {
+      width: 100%;
+      padding: 16px;
+      background-color: #ffffff;
+      color: #000000;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .loader-spinner {
+      width: 20px;
+      height: 20px;
+      border: 2.5px solid #000000;
+      border-top: 2.5px solid transparent;
+      border-radius: 50%;
+      animation: spinDevice 0.75s linear infinite;
+    }
+
+    /* Bouncy Utility Control Systems for Resend Panels */
+    .resend-panel {
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: #666666;
+      max-height: 40px;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      width: 100%;
+    }
+
+    .resend-link {
+      color: #0066ff;
+      text-decoration: none;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      display: inline-block;
+      transform: scale(0.8);
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .resend-link.show {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1);
+    }
+
+    .spam-warning {
+      font-size: 12px;
+      color: #ff3b30;
+      margin-top: 8px;
+      opacity: 0;
+      transform: translateY(-5px);
+      transition: all 0.3s ease;
+    }
+
+    .spam-warning.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Cartoon Sunburst Celebration Tick Components */
+    .success-celebration {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .success-svg {
+      width: 70px;
+      height: 70px;
+      background: #34c759;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 25px rgba(52, 199, 89, 0.6);
+      transform: scale(0);
+      animation: popOutTick 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .success-svg svg {
+      width: 35px;
+      height: 35px;
+      stroke: white;
+      stroke-width: 5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      stroke-dasharray: 50;
+      stroke-dashoffset: 50;
+      animation: writeCheck 0.4s 0.3s ease forwards;
+    }
+
+    /* Dynamic Sunburst Burst Lines */
+    .sun-ray {
+      position: absolute;
+      width: 3px;
+      height: 14px;
+      background: #34c759;
+      border-radius: 2px;
+      opacity: 0;
+    }
+
+    .success-celebration.burst .sun-ray {
+      animation: blastRay 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Core Architectural Mechanics Keyframes */
+    @keyframes popOutTick {
+      0% { transform: scale(0); }
+      100% { transform: scale(1); }
+    }
+    @keyframes writeCheck {
+      100% { stroke-dashoffset: 0; }
+    }
+    @keyframes blastRay {
+      0% { transform: rotate(var(--r)) translateY(0); opacity: 1; height: 4px; }
+      100% { transform: rotate(var(--r)) translateY(55px); opacity: 0; height: 14px; }
+    }
+    @keyframes spinDevice {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes shakePhysics {
+      10%, 90% { transform: translate3d(-3px, 0, 0); }
+      20%, 80% { transform: translate3d(5px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-7px, 0, 0); }
+      40%, 60% { transform: translate3d(7px, 0, 0); }
+    }
+
+    /* Smart Notification Banner System */
+    .airby-toast {
+      position: fixed;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 14px 28px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffffff;
+      box-shadow: 0px 12px 30px rgba(0, 0, 0, 0.7);
+      z-index: 5000;
+      transition: top 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      text-align: center;
+      white-space: nowrap;
+    }
+    .airby-toast.show { top: 24px; }
+    .airby-toast.error { background-color: #ff3b30; }
+    .airby-toast.success { background-color: #34c759; }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <div class="success-celebration" id="celebration_frame">
+      <div class="success-svg">
+        <svg viewBox="0 0 52 52"><path d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg>
+      </div>
+      <div class="sun-ray" style="--r: 0deg;"></div>
+      <div class="sun-ray" style="--r: 45deg;"></div>
+      <div class="sun-ray" style="--r: 90deg;"></div>
+      <div class="sun-ray" style="--r: 135deg;"></div>
+      <div class="sun-ray" style="--r: 180deg;"></div>
+      <div class="sun-ray" style="--r: 225deg;"></div>
+      <div class="sun-ray" style="--r: 270deg;"></div>
+      <div class="sun-ray" style="--r: 315deg;"></div>
+    </div>
+
+    <div class="brand-header">
+      <div class="brand-logo">AirBy<span class="accent-tick">'</span></div>
+      <p id="header_prompt"><span class="user-name">User</span>, please confirm your OTP VERIFICATION</p>
+    </div>
+
+    <div class="input-group" id="input_frame">
+      <input type="text" id="otp_input" placeholder="000000" pattern="[0-9]*" inputmode="numeric" maxlength="6" autocomplete="off">
+    </div>
+
+    <div class="btn-wrapper" id="btn_wrapper">
+      <div class="action-btn">
+        <span>Verifying Security Code</span>
+        <div class="loader-spinner"></div>
+      </div>
+    </div>
+
+    <div class="resend-panel">
+      <span id="timer_text">Resend code in 3:00</span>
+      <a class="resend-link" id="resend_btn" onclick="triggerOTPResend()">Resend OTP</a>
+      <div class="spam-warning" id="spam_note">if email isn't seen in user inbox check spam folder</div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script>
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    emailjs.init({ publicKey: "8DlEDeQcDmEtbaUwA" });
+
+    // Initialize Identity Headers out of localStorage data fields safely
+    const cachedFirstName = localStorage.getItem("pending_first_name") || "User";
+    document.getElementById("header_prompt").innerHTML = `<span class="user-name">${cachedFirstName}</span>, please confirm your OTP VERIFICATION`;
+
+    // Start running the 3-Minute System Timer Sequence automatically
+    let countdownSeconds = 180;
+    let timerInterval;
+    
+    function startCountdown() {
+      clearInterval(timerInterval);
+      countdownSeconds = 180;
+      document.getElementById("timer_text").style.display = "inline";
+      document.getElementById("resend_btn").classList.remove("show");
+      document.getElementById("spam_note").classList.remove("show");
+      
+      timerInterval = setInterval(() => {
+        countdownSeconds--;
+        let mins = Math.floor(countdownSeconds / 60);
+        let secs = countdownSeconds % 60;
+        document.getElementById("timer_text").innerText = `Resend code in ${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        
+        if (countdownSeconds <= 0) {
+          clearInterval(timerInterval);
+          document.getElementById("timer_text").style.display = "none";
+          document.getElementById("resend_btn").classList.add("show");
+          document.getElementById("spam_note").classList.add("show");
+        }
+      }, 1000);
+    }
+    
+    startCountdown();
+
+    function showPopup(message, type = "error") {
+      let toast = document.querySelector('.airby-toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.className = 'airby-toast';
+        document.body.appendChild(toast);
+      }
+      toast.className = `airby-toast ${type}`;
+      toast.innerText = message;
+      setTimeout(() => toast.classList.add('show'), 50);
+      setTimeout(() => toast.classList.remove('show'), 4000);
+    }
+
+    async function triggerOTPResend() {
+      const cachedEmail = localStorage.getItem("pending_email");
+      if(!cachedEmail) {
+        showPopup("Session track missing. Restart signup.", "error");
+        return;
+      }
+
+      // Hide panels back smoothly instantly on execution tap
+      document.getElementById("resend_btn").classList.remove("show");
+      document.getElementById("spam_note").classList.remove("show");
+      
+      const freshOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      localStorage.setItem("expected_otp", freshOtp);
+      
+      showPopup("A fresh security code is heading out!", "success");
+      startCountdown();
+
+      emailjs.send("service_z4ho8hn", "template_nyp313g", {
+        email: cachedEmail,
+        otp_code: freshOtp
+      }).catch(err => {
+        console.error("Resend delivery fault:", err);
+        showPopup("Network transit failed. Try again.", "error");
+      });
+    }
+
+    // Dynamic Observer Engine matching verification mechanics
+    const otpInput = document.getElementById("otp_input");
+    const inputFrame = document.getElementById("input_frame");
+    const btnWrapper = document.getElementById("btn_wrapper");
+
+    otpInput.addEventListener("input", () => {
+      const currentVal = otpInput.value.trim();
+      
+      if (currentVal.length === 6) {
+        // Trigger rounding tracking animation line
+        inputFrame.classList.add("chasing");
+        btnWrapper.classList.add("reveal");
+        
+        // Let animation cycle loop visually for 1.2s before executing data validation check
+        setTimeout(() => {
+          verifyCodeAndWriteUser(currentVal);
+        }, 1200);
+      } else {
+        inputFrame.classList.remove("chasing");
+        btnWrapper.classList.remove("reveal");
+      }
+    });
+
+    async function verifyCodeAndWriteUser(enteredOtp) {
+      const cachedOtp = localStorage.getItem("expected_otp");
+      const cachedEmail = localStorage.getItem("pending_email");
+      const cachedPassword = localStorage.getItem("pending_password");
+      const cachedFirstName = localStorage.getItem("pending_first_name");
+      const cachedLastName = localStorage.getItem("pending_last_name");
+      const cachedNickname = localStorage.getItem("pending_nickname");
+
+      if (!cachedOtp || !cachedEmail || !cachedPassword) {
+        showPopup("Registration session expired. Restart signup.", "error");
+        setTimeout(() => window.location.href = "signup.html", 2000);
+        return;
+      }
+
+      if (enteredOtp !== cachedOtp) {
+        // Run Error Animation Protocol
+        inputFrame.classList.remove("chasing");
+        inputFrame.classList.add("error-shake");
+        btnWrapper.classList.remove("reveal");
+        
+        setTimeout(() => {
+          inputFrame.classList.remove("error-shake");
+          otpInput.value = ""; // Automatic Wipe out
+        }, 500);
+        return;
+      }
+
+      // Execute Database Pipeline Commit 
+      const { data, error } = await supabaseClient
+        .from('users')
+        .insert([{ 
+          first_name: cachedFirstName,
+          last_name: cachedLastName,
+          nickname: cachedNickname || null,
+          email: cachedEmail, 
+          password: cachedPassword, 
+          balance: 0 
+        }]);
+
+      if (error) {
+        console.error("Supabase Error:", error);
+        showPopup(`Database Error: ${error.message}`, "error");
+        inputFrame.classList.remove("chasing");
+        btnWrapper.classList.remove("reveal");
+      } else {
+        // Trigger Swallow and Blast Sunburst Success Animations
+        inputFrame.classList.remove("chasing");
+        btnWrapper.classList.remove("reveal");
+        inputFrame.classList.add("success-swallow");
+
+        setTimeout(() => {
+          const celebrationFrame = document.getElementById("celebration_frame");
+          celebrationFrame.style.display = "flex";
+          celebrationFrame.classList.add("burst");
+          
+          // Save valid state session properties globally to client instance
+          localStorage.setItem("user_email", cachedEmail);
+          
+          // Clear operational cache pools thoroughly
+          localStorage.removeItem("expected_otp");
+          localStorage.removeItem("pending_password");
+          localStorage.removeItem("pending_first_name");
+          localStorage.removeItem("pending_last_name");
+          localStorage.removeItem("pending_nickname");
+
+          setTimeout(() => {
+            window.location.href = "splash.html"; // Redirects to splash.html instead of home
+          }, 1800);
+        }, 400);
+      }
+    }
+  </script>
+</body>
+</html>
