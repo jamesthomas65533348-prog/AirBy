@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>AirBy - Maintenance</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+
+    -webkit-user-select:none;
+    user-select:none;
+
+    -webkit-touch-callout:none;
+    -webkit-tap-highlight-color:transparent;
+
+    font-family:-apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+}
+
+*::selection{
+    background:transparent;
+}
+
+*::-moz-selection{
+    background:transparent;
+}
+
+html,
+body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#000;
+    color:#fff;
+}
+
+body{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    position:relative;
+}
+
+/* MARKET BACKGROUND */
+
+.market-background{
+    position:absolute;
+    inset:0;
+    z-index:1;
+    opacity:.12;
+
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+
+    pointer-events:none;
+}
+
+.candle-container{
+    width:12px;
+    display:flex;
+    justify-content:center;
+    position:relative;
+}
+
+.wick{
+    width:2px;
+    height:120px;
+    background:#34c759;
+}
+
+.real-body{
+    width:14px;
+    border-radius:3px;
+    position:absolute;
+    background:#34c759;
+
+    animation:marketMove 4s ease-in-out infinite alternate;
+}
+
+.c1 .real-body{
+    height:65px;
+    animation-delay:0s;
+}
+
+.c2 .real-body{
+    height:40px;
+    animation-delay:.8s;
+}
+
+.c3 .real-body{
+    height:85px;
+    animation-delay:1.5s;
+}
+
+.c4 .real-body{
+    height:50px;
+    animation-delay:.4s;
+}
+
+.c5 .real-body{
+    height:70px;
+    animation-delay:2s;
+}
+
+@keyframes marketMove{
+    from{
+        transform:translateY(-15px);
+    }
+    to{
+        transform:translateY(15px);
+    }
+}
+
+/* APP */
+
+.app-container{
+    width:100%;
+    max-width:414px;
+    padding:24px;
+    position:relative;
+    z-index:10;
+}
+
+/* LOGO */
+
+.brand{
+    text-align:center;
+    margin-bottom:40px;
+
+    font-size:30px;
+    font-weight:800;
+    letter-spacing:-1px;
+}
+
+.brand span{
+    color:#0066ff;
+}
+
+/* CARD */
+
+.maintenance-card{
+
+    background:#0b0b0c;
+
+    border:1.5px solid #1c1c1e;
+
+    border-radius:28px;
+
+    padding:38px 28px;
+
+    text-align:center;
+
+    box-shadow:
+    0 12px 35px rgba(0,0,0,.55);
+
+    animation:cardAppear .6s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+@keyframes cardAppear{
+    from{
+        opacity:0;
+        transform:scale(.85);
+    }
+    to{
+        opacity:1;
+        transform:scale(1);
+    }
+}
+
+/* ICON */
+
+.icon-wrap{
+    width:100px;
+    height:100px;
+
+    margin:0 auto 22px;
+
+    border-radius:28px;
+
+    background:
+    linear-gradient(
+    135deg,
+    rgba(0,102,255,.15),
+    rgba(0,102,255,.03));
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    border:1px solid rgba(0,102,255,.2);
+}
+
+.icon-wrap svg{
+    width:52px;
+    height:52px;
+
+    stroke:#0066ff;
+    stroke-width:1.8;
+
+    fill:none;
+
+    animation:pulse 2s infinite;
+}
+
+@keyframes pulse{
+
+    0%{
+        transform:scale(1);
+    }
+
+    50%{
+        transform:scale(1.08);
+    }
+
+    100%{
+        transform:scale(1);
+    }
+}
+
+/* TEXT */
+
+h1{
+    font-size:28px;
+    font-weight:800;
+    letter-spacing:-1px;
+
+    margin-bottom:10px;
+}
+
+.description{
+    color:#aeaeb2;
+
+    font-size:15px;
+
+    line-height:1.7;
+
+    margin-bottom:26px;
+}
+
+/* STATUS */
+
+.status-chip{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    background:rgba(0,102,255,.08);
+
+    border:1px solid rgba(0,102,255,.2);
+
+    color:#0066ff;
+
+    font-size:13px;
+
+    font-weight:700;
+
+    padding:10px 16px;
+
+    border-radius:999px;
+}
+
+.status-dot{
+    width:8px;
+    height:8px;
+
+    border-radius:50%;
+
+    background:#0066ff;
+
+    animation:blink 1.5s infinite;
+}
+
+@keyframes blink{
+
+    0%{
+        opacity:1;
+    }
+
+    50%{
+        opacity:.3;
+    }
+
+    100%{
+        opacity:1;
+    }
+}
+
+.footer-text{
+
+    margin-top:28px;
+
+    color:#666;
+
+    font-size:13px;
+
+    text-align:center;
+}
+
+</style>
+</head>
+<body oncontextmenu="return false">
+
+<div class="market-background">
+
+    <div class="candle-container c1">
+        <div class="wick"></div>
+        <div class="real-body"></div>
+    </div>
+
+    <div class="candle-container c2">
+        <div class="wick"></div>
+        <div class="real-body"></div>
+    </div>
+
+    <div class="candle-container c3">
+        <div class="wick"></div>
+        <div class="real-body"></div>
+    </div>
+
+    <div class="candle-container c4">
+        <div class="wick"></div>
+        <div class="real-body"></div>
+    </div>
+
+    <div class="candle-container c5">
+        <div class="wick"></div>
+        <div class="real-body"></div>
+    </div>
+
+</div>
+
+<div class="app-container">
+
+    <div class="brand">
+        AirBy<span>'</span>
+    </div>
+
+    <div class="maintenance-card">
+
+        <div class="icon-wrap">
+
+            <svg viewBox="0 0 24 24">
+                <path d="M12 9v4"></path>
+                <path d="M12 17h.01"></path>
+                <circle cx="12" cy="12" r="10"></circle>
+            </svg>
+
+        </div>
+
+        <h1>Under Maintenance</h1>
+
+        <p class="description">
+            AirBy is currently undergoing scheduled maintenance and system improvements.
+            Some services may be temporarily unavailable while we enhance the platform experience.
+        </p>
+
+        <div class="status-chip">
+            <div class="status-dot"></div>
+            Maintenance In Progress
+        </div>
+
+        <div class="footer-text">
+            Thank you for your patience.
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+document.addEventListener('contextmenu',e=>{
+    e.preventDefault();
+});
+
+document.addEventListener('selectstart',e=>{
+    e.preventDefault();
+});
+
+document.addEventListener('dragstart',e=>{
+    e.preventDefault();
+});
+
+</script>
+
+</body>
+</html>
