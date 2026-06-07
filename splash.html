@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>AirBy - Welcome</title>
+  <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0066ff">
+  <style>
+    /* Premium AirBy AMOLED Theme Specifications */
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh; /* Use dynamic viewport height for mobile */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #000000;
+      color: #ffffff;
+      overflow: hidden;
+    }
+
+   .app-container {
+      width: 100%;
+      max-width: 414px;
+      height: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 30px 30px calc(30px + env(safe-area-inset-bottom)) 30px; /* Add safe area */
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+
+    /* Skip Link Top Alignment */
+   .top-bar {
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;
+      padding-top: calc(10px + env(safe-area-inset-top)); /* Safe area top */
+    }
+
+   .skip-btn {
+      color: #666666;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.2s ease;
+      z-index: 10;
+    }
+
+   .skip-btn:active {
+      color: #0066ff;
+    }
+
+    /* Morphing Icon Core Framework */
+   .icon-view-frame {
+      width: 160px;
+      height: 160px;
+      background: #0b0b0c;
+      border: 1.5px solid #1c1c1e;
+      border-radius: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.3s ease;
+      flex-shrink: 0;
+    }
+
+   .icon-view-frame:active {
+      transform: scale(0.95);
+    }
+
+    /* Morphing vector wrappers */
+   .icon-view-frame svg {
+      width: 74px;
+      height: 74px;
+      fill: none;
+      stroke: #0066ff;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* Slide Content Track Window */
+   .slider-track {
+      width: 100%;
+      position: relative;
+      height: 140px;
+      margin: 20px 0;
+      flex-shrink: 0;
+    }
+
+   .slide-card {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      opacity: 0;
+      transform: translateX(40px) scale(0.95);
+      transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: none;
+    }
+
+   .slide-card.active {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+      pointer-events: auto;
+    }
+
+   .slide-card p {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.5;
+      letter-spacing: -0.4px;
+      color: #ffffff;
+      margin: 0;
+    }
+
+    /* Bottom Control Layout System */
+   .bottom-controls {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: env(safe-area-inset-bottom); /* Extra safe area */
+      z-index: 100;
+    }
+
+    /* Segmented Progress Indicators */
+   .indicator-lane {
+      display: flex;
+      gap: 8px;
+    }
+
+   .dot {
+      width: 8px;
+      height: 8px;
+      background: #1c1c1e;
+      border-radius: 4px;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+   .dot.active {
+      width: 24px;
+      background: #0066ff;
+    }
+
+    /* Rounded floating action navigator arrow button */
+   .nav-arrow-btn {
+      width: 60px;
+      height: 60px;
+      background: #ffffff;
+      border: none;
+      border-radius: 18px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(255, 255, 255, 0.15);
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease, border-radius 0.3s ease;
+      z-index: 101;
+    }
+
+   .nav-arrow-btn svg {
+      width: 24px;
+      height: 24px;
+      stroke: #000000;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      transition: transform 0.3s ease;
+    }
+
+   .nav-arrow-btn:active {
+      transform: scale(0.9);
+      background-color: #e5e5e5;
+      border-radius: 22px;
+    }
+
+   .nav-arrow-btn.finish-state {
+      background-color: #0066ff;
+    }
+   .nav-arrow-btn.finish-state svg {
+      stroke: #ffffff;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+
+    <div class="top-bar">
+      <a href="index.html" class="skip-btn" id="skip_action">Skip</a>
+    </div>
+
+    <div class="icon-view-frame" id="morphing_frame">
+      <svg id="morphing_svg" viewBox="0 0 24 24">
+        <path id="vector_target" d=""></path>
+      </svg>
+    </div>
+
+    <div class="slider-track">
+
+      <div class="slide-card active" id="slide_0">
+        <p>Welcome to AirBy, your well-known Nigeria trading ecosystem with a thrilling trading experience.</p>
+      </div>
+
+      <div class="slide-card" id="slide_1">
+        <p>24 hours trading and a quick system. No long trades, just short and earn.</p>
+      </div>
+
+      <div class="slide-card" id="slide_2">
+        <p>Credentials and funds securely safe and known only by the user.</p>
+      </div>
+
+      <div class="slide-card" id="slide_3">
+        <p>Next generation trading platform with local withdrawal and deposit systems. No stress, just earn.</p>
+      </div>
+
+    </div>
+
+    <div class="bottom-controls">
+
+      <div class="indicator-lane" id="dots_lane">
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+
+      <button class="nav-arrow-btn" id="next_step_btn" onclick="advanceSlideFlow()">
+        <svg viewBox="0 0 24 24" id="btn_arrow_svg">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </button>
+
+    </div>
+
+  </div>
+
+  <script>
+    // Precise SVG Vector Node Tracking Databases for Instant Morphing Logic
+    const slideVectors = [
+      "M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9",
+      "M13 10V3L4 14h7v7l9-11h-7z",
+      "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z M12 11v4 M12 11a1.5 0 100-3 1.5 0 000 3z",
+      "M20 12V8H4v4M4 12v6h16v-6M4 12h16 M16 12a2 2 0 100-4 2 2 0 000 4z"
+    ];
+
+    let globalActiveIndex = 0;
+    const pathTarget = document.getElementById("vector_target");
+    const frameElement = document.getElementById("morphing_frame");
+
+    pathTarget.setAttribute("d", slideVectors[0]);
+
+    function advanceSlideFlow() {
+      if (globalActiveIndex >= 3) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      const activeCard = document.getElementById(`slide_${globalActiveIndex}`);
+      activeCard.classList.remove("active");
+      activeCard.style.transform = "translateX(-40px) scale(0.95)";
+
+      globalActiveIndex++;
+
+      pathTarget.style.transform = "scale(0.4) rotate(90deg)";
+      pathTarget.style.opacity = "0";
+      frameElement.style.borderColor = "#0066ff";
+
+      setTimeout(() => {
+        pathTarget.setAttribute("d", slideVectors[globalActiveIndex]);
+        pathTarget.style.transform = "scale(1) rotate(0deg)";
+        pathTarget.style.opacity = "1";
+
+        setTimeout(() => {
+          frameElement.style.borderColor = "#1c1c1e";
+        }, 200);
+      }, 200);
+
+      const targetCard = document.getElementById(`slide_${globalActiveIndex}`);
+      targetCard.classList.add("active");
+
+      const activeDot = document.querySelector(".dot.active");
+      if (activeDot) activeDot.classList.remove("active");
+      document.getElementById("dots_lane").children[globalActiveIndex].classList.add("active");
+
+      if (globalActiveIndex === 3) {
+        const nextBtn = document.getElementById("next_step_btn");
+        nextBtn.classList.add("finish-state");
+        document.getElementById("skip_action").style.opacity = "0";
+        document.getElementById("skip_action").style.pointerEvents = "none";
+
+        setTimeout(() => {
+          document.getElementById("btn_arrow_svg").innerHTML = `<path d="M20 6L9 17l-5-5" />`;
+        }, 150);
+      }
+    }
+  </script>
+  <script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js');
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Total Assets - AirBy</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0066ff">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Poppins", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background-color: #000000;
+      color: #ffffff;
+      padding: 18px 18px 120px 18px;
+      overflow-x: hidden;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 414px;
+      margin: 0 auto;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .back-btn {
+      background: #0b0b0c;
+      color: #ffffff;
+      border: 1.5px solid #1c1c1e;
+      border-radius: 14px;
+      padding: 10px 14px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.25s ease;
+    }
+
+    .back-btn:active {
+      transform: scale(0.94);
+      border-color: #0066ff;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .total-value-card {
+      background: #0b0b0c;
+      border: 1.5px solid #1c1c1e;
+      padding: 20px;
+      border-radius: 14px;
+      margin-bottom: 20px;
+      text-align: center;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .total-value-card:hover {
+      border-color: #0066ff;
+      box-shadow: 0 0 12px rgba(0, 102, 255, 0.2);
+    }
+
+    .total-label {
+      font-size: 14px;
+      color: #666666;
+      margin-bottom: 4px;
+    }
+
+    .total-amount {
+      font-size: 32px;
+      font-weight: 800;
+      color: #0066ff;
+      letter-spacing: -1px;
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #0b0c;
+      border: 1.5px solid #1c1e;
+      padding: 14px;
+      border-radius: 14px;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .card:active {
+      transform: scale(0.98);
+    }
+
+    .left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+      border: 1.5px solid #1c1c1e;
+      overflow: hidden;
+      color: #0066ff;
+    }
+
+    .token-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .name {
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .price {
+      font-size: 13px;
+      color: #666666;
+    }
+
+    .right-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    .quantity {
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .small {
+      font-size: 13px;
+      color: #666666;
+    }
+
+    .action-btn {
+      background: #ffffff;
+      color: #000000;
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease;
+    }
+
+    .action-btn:active {
+      transform: scale(0.94);
+      background-color: #e5e5e5;
+    }
+
+    .modal-back {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 9999;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal {
+      background: #0b0c;
+      border: 1.5px solid #1c1c1e;
+      border-bottom: none;
+      padding: 24px;
+      border-radius: 24px 24px 0 0;
+      width: 100%;
+      max-width: 414px;
+      color: #ffffff;
+      animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    #sellName {
+      font-weight: 800;
+      font-size: 20px;
+    }
+
+    #sellSymbol {
+      font-size: 14px;
+      color: #666666;
+      margin-top: 2px;
+    }
+
+    #sellPrice {
+      font-weight: 800;
+      font-size: 18px;
+      color: #0066ff;
+    }
+
+    .input-row {
+      position: relative;
+      margin-bottom: 14px;
+      border-radius: 14px;
+      padding: 1.5px;
+      background: transparent;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .input {
+      width: 100%;
+      padding: 16px;
+      background: #000000;
+      border: 1.5px solid #1c1c1e;
+      border-radius: 13px;
+      font-size: 16px;
+      color: #ffffff;
+      outline: none;
+      transition: border-color 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
+      -webkit-user-select: text;
+      user-select: text;
+    }
+
+    .input:focus {
+      border-color: #0066ff;
+      transform: scale(1.015);
+      box-shadow: 0 0 12px rgba(0, 102, 255, 0.4);
+    }
+
+    .input::placeholder {
+      color: #48484a;
+    }
+
+    .neon-blue-glow {
+      border-color: #0066ff !important;
+      box-shadow: 0 0 12px rgba(0, 102, 255, 0.4);
+    }
+
+    .neon-green-glow {
+      border-color: #34c759 !important;
+      box-shadow: 0 0 12px rgba(52, 199, 89, 0.4);
+    }
+
+    .neon-red-glow {
+      border-color: #ff3b30 !important;
+      box-shadow: 0 0 12px rgba(255, 59, 48, 0.4);
+    }
+
+    .shake-row {
+      animation: shakePhysics 0.4s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @keyframes shakePhysics {
+      10%, 90% { transform: translate3d(-2px, 0, 0); }
+      20%, 80% { transform: translate3d(4px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+      40%, 60% { transform: translate3d(6px, 0, 0); }
+    }
+
+    #sellValue {
+      font-size: 14px;
+      color: #666666;
+      margin: 12px 0 16px 0;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 16px;
+      background-color: #ffffff;
+      color: #000000;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease;
+      margin-bottom: 10px;
+    }
+
+    .btn:active {
+      transform: scale(0.94);
+      background-color: #e5e5e5;
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: #0b0b0c;
+      color: #ffffff;
+      border: 1.5px solid #1c1c1e;
+    }
+
+    .btn-secondary:active {
+      background-color: #1c1c1e;
+    }
+
+    .loader-spinner {
+      width: 20px;
+      height: 20px;
+      border: 2.5px solid #000000;
+      border-top: 2.5px solid transparent;
+      border-radius: 50%;
+      animation: spinDevice 0.75s linear infinite;
+      display: none;
+    }
+
+    @keyframes spinDevice {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .airby-toast {
+      position: fixed;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 14px 28px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffffff;
+      box-shadow: 0px 12px 30px rgba(0, 0, 0, 0.7);
+      z-index: 10000;
+      transition: top 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .airby-toast.show {
+      top: 24px;
+    }
+
+    .airby-toast.error { background-color: #ff3b30; }
+    .airby-toast.success { background-color: #34c759; }
+
+    .empty {
+      opacity: .85;
+      text-align: center;
+      padding: 32px 18px;
+      border-radius: 14px;
+      border: 1.5px dashed #1c1c1e;
+      margin-top: 20px;
+      color: #666666;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="header">
+      <button class="back-btn" onclick="location.href='tokens.html'">← Tokens</button>
+      <h1>Total Assets</h1>
+      <div style="width:68px"></div>
+    </div>
+
+    <div class="total-value-card" id="totalValueCard">
+      <div class="total-label">Portfolio Value</div>
+      <div class="total-amount" id="totalAmount">₦0</div>
+    </div>
+
+    <div id="list" class="list">
+      <div class="empty">Loading assets...</div>
+    </div>
+  </div>
+
+  <!-- Sell Modal -->
+  <div id="sellModalBack" class="modal-back">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <div id="sellName"></div>
+          <div id="sellSymbol"></div>
+        </div>
+        <div id="sellPrice"></div>
+      </div>
+
+      <div style="margin-bottom:14px" class="small">You own: <span id="ownQty" style="color:#ffffff;font-weight:600">0</span> tokens</div>
+      
+      <div class="input-row" id="sellQtyRow">
+        <input id="sellQty" class="input" type="number" placeholder="Enter quantity to sell" min="0" step="0.00000001" />
+      </div>
+      
+      <div id="sellValue">You will receive: ₦0</div>
+      
+      <button id="sellBtn" class="btn">
+        <span id="btnText">Sell Token</span>
+        <div class="loader-spinner" id="btnLoader"></div>
+      </button>
+      <button class="btn btn-secondary" onclick="closeSellModal()">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const email = localStorage.getItem('user_email');
+    const list = document.getElementById('list');
+    const totalAmount = document.getElementById('totalAmount');
+    let holdings = [];
+
+    function showPopup(message, type = "error") {
+      let toast = document.querySelector('.airby-toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.className = 'airby-toast';
+        document.body.appendChild(toast);
+      }
+      toast.className = `airby-toast ${type}`;
+      toast.innerText = message;
+      setTimeout(() => toast.classList.add('show'), 50);
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    async function loadHoldings() {
+      if (!email) { 
+        showPopup('Please login first', 'error'); 
+        setTimeout(() => location.href='login.html', 1000);
+        return; 
+      }
+
+      const { data: userHoldings, error: hErr } = await supabaseClient
+        .from('user_token')
+        .select('*')
+        .eq('email', email)
+        .gt('quantity', 0.00000001) // FIX: Use small threshold instead of 0 to avoid float precision issues
+        .order('updated_at', { ascending: false });
+
+      if (hErr) { 
+        console.error(hErr); 
+        list.innerHTML = '<div class="empty">Error loading holdings</div>'; 
+        return; 
+      }
+
+      if (!userHoldings.length) { 
+        list.innerHTML = '<div class="empty">You have no assets yet</div>'; 
+        totalAmount.innerText = '₦0';
+        holdings = []; 
+        return; 
+      }
+
+      const tokenIds = userHoldings.map(h => h.token_id);
+      const { data: tokens, error: tErr } = await supabaseClient
+        .from('tokens')
+        .select('*')
+        .in('id', tokenIds);
+
+      if (tErr) { 
+        console.error(tErr); 
+        showPopup('Error loading tokens', 'error'); 
+        return; 
+      }
+
+      holdings = userHoldings.map(h => ({
+        holding: h,
+        token: tokens.find(t => Number(t.id) === Number(h.token_id)) || {}
+      }));
+
+      renderHoldings();
+    }
+
+    function renderHoldings() {
+      list.innerHTML = '';
+      if (!holdings.length) { 
+        list.innerHTML = '<div class="empty">You have no assets yet</div>'; 
+        totalAmount.innerText = '₦0';
+        return; 
+      }
+
+      let totalValue = 0;
+
+      holdings.forEach(item => {
+        const h = item.holding;
+        const t = item.token;
+        const value = Number(h.quantity) * Number(t.current_price || 0);
+        totalValue += value;
+
+        const c = document.createElement('div'); 
+        c.className = 'card';
+        
+        const left = document.createElement('div'); 
+        left.className = 'left';
+        
+        const logo = document.createElement('div'); 
+        logo.className = 'logo';
+        if (t.logo_url) {
+          const img = document.createElement('img');
+          img.src = t.logo_url; 
+          img.style.width = '100%'; 
+          img.style.height = '100%'; 
+          img.style.objectFit = 'cover';
+          logo.appendChild(img);
+        } else {
+          logo.innerText = (t.symbol || 'TK').slice(0, 3).toUpperCase();
+        }
+
+        const info = document.createElement('div'); 
+        info.className = 'token-info';
+        info.innerHTML = `<div class="name">${t.name || 'Unknown Token'}</div>
+                          <div class="price">₦${Number(t.current_price || 0).toLocaleString()}</div>`;
+        left.append(logo, info);
+
+        const rightWrap = document.createElement('div');
+        rightWrap.className = 'right-wrap';
+        
+        const qty = document.createElement('div');
+        qty.className = 'quantity';
+        qty.innerText = Number(h.quantity).toFixed(6);
+        
+        const val = document.createElement('div');
+        val.className = 'small';
+        val.innerText = `₦${value.toLocaleString()}`;
+        
+        const btn = document.createElement('button');
+        btn.className = 'action-btn';
+        btn.innerText = 'Sell';
+        btn.onclick = () => openSellModal(item);
+
+        rightWrap.append(qty, val, btn);
+        c.append(left, rightWrap);
+        list.appendChild(c);
+      });
+
+      totalAmount.innerText = `₦${totalValue.toLocaleString()}`;
+    }
+
+    const sellModalBack = document.getElementById('sellModalBack');
+    const sellName = document.getElementById('sellName');
+    const sellSymbol = document.getElementById('sellSymbol');
+    const sellPrice = document.getElementById('sellPrice');
+    const ownQty = document.getElementById('ownQty');
+    const sellQty = document.getElementById('sellQty');
+    const sellQtyRow = document.getElementById('sellQtyRow');
+    const sellValue = document.getElementById('sellValue');
+    const sellBtn = document.getElementById('sellBtn');
+    const btnText = document.getElementById('btnText');
+    const btnLoader = document.getElementById('btnLoader');
+    let currentSell = null;
+
+    function openSellModal(item) {
+      const stillExists = holdings.find(h => h.holding.token_id === item.holding.token_id);
+      if (!stillExists) {
+        showPopup("Token no longer available", "error");
+        loadHoldings();
+        return;
+      }
+      currentSell = item;
+      sellName.innerText = item.token.name;
+      sellSymbol.innerText = item.token.symbol;
+      sellPrice.innerText = `₦${Number(item.token.current_price).toLocaleString()}`;
+      ownQty.innerText = Number(item.holding.quantity).toFixed(8);
+      sellQty.value = '';
+      sellValue.innerText = 'You will receive: ₦0';
+      clearAnimationClasses();
+      sellModalBack.style.display = 'flex';
+    }
+
+    function closeSellModal() { 
+      sellModalBack.style.display = 'none'; 
+      currentSell = null;
+      resetButtonUI();
+    }
+
+    function clearAnimationClasses() {
+      sellQtyRow.classList.remove("neon-blue-glow", "neon-green-glow", "neon-red-glow", "shake-row");
+    }
+
+    function resetButtonUI() {
+      btnText.style.display = "block";
+      btnLoader.style.display = "none";
+      sellBtn.disabled = false;
+    }
+
+    sellQty.addEventListener('input', () => {
+      const q = parseFloat(sellQty.value) || 0;
+      const val = q * Number(currentSell?.token?.current_price || 0);
+      sellValue.innerText = `You will receive: ₦${val.toLocaleString()}`;
+      clearAnimationClasses();
+      if (q > 0) sellQtyRow.classList.add("neon-blue-glow");
+    });
+
+    sellBtn.addEventListener('click', async () => {
+      if (!currentSell) return;
+      const q = parseFloat(sellQty.value);
+      if (!q || q <= 0) { 
+        showPopup('Enter a valid quantity', 'error');
+        clearAnimationClasses();
+        sellQtyRow.classList.add("neon-red-glow", "shake-row");
+        setTimeout(() => sellQtyRow.classList.remove("shake-row"), 400);
+        return; 
+      }
+
+      btnText.style.display = "none";
+      btnLoader.style.display = "block";
+      sellBtn.disabled = true;
+
+      try {
+        // CRITICAL: Re-fetch to prevent double sell
+        const { data: checkExist } = await supabaseClient
+          .from('user_token')
+          .select('quantity, amount_spent')
+          .match({ email: email, token_id: currentSell.token.id })
+          .maybeSingle();
+
+        if (!checkExist) { 
+          showPopup("Token already sold or removed", "error"); 
+          closeSellModal(); 
+          loadHoldings(); 
+          return; 
+        }
+
+        const available = Number(checkExist.quantity);
+        if (q > available) { 
+          showPopup('You do not have enough tokens', 'error');
+          clearAnimationClasses();
+          sellQtyRow.classList.add("neon-red-glow", "shake-row");
+          setTimeout(() => sellQtyRow.classList.remove("shake-row"), 400);
+          resetButtonUI();
+          return; 
+        }
+
+        const price = Number(currentSell.token.current_price || 0);
+        const credit = Number((q * price).toFixed(2));
+        const remaining = Number((available - q).toFixed(8));
+        const spent = Number(checkExist.amount_spent || 0);
+        const newSpent = (available > 0) ? Number((spent * (remaining / available)).toFixed(2)) : 0;
+
+        // FIX: DELETE if sold all, UPDATE if keeping some
+        if (remaining <= 0.00000001) {
+          const { error: delError } = await supabaseClient.from('user_token')
+            .delete()
+            .match({ email: email, token_id: currentSell.token.id });
+          
+          if (delError) throw delError;
+        } else {
+          const { error: updateError } = await supabaseClient.from('user_token')
+            .update({ quantity: remaining, amount_spent: newSpent, updated_at: new Date().toISOString() })
+            .match({ email: email, token_id: currentSell.token.id });
+          
+          if (updateError) throw updateError;
+        }
+
+        const { data: userData } = await supabaseClient
+          .from('users').select('balance').eq('email', email).single();
+
+        const newBal = Number(userData.balance || 0) + credit;
+        await supabaseClient.from('users')
+          .update({ balance: newBal })
+          .eq('email', email);
+
+        await supabaseClient.from('user_token')
+          .insert({
+            email: email,
+            token_id: currentSell.token.id,
+            quantity: 0,
+            amount_spent: 0,
+            action_type: 'sell',
+            created_at: new Date().toISOString()
+          });
+
+        clearAnimationClasses();
+        sellQtyRow.classList.add("neon-green-glow");
+        showPopup(`Sold successfully — ₦${credit.toLocaleString()} credited`, "success");
+        
+        // REDIRECT TO PREVENT DOUBLE SELL
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1500);
+
+      } catch (e) {
+        console.error(e);
+        showPopup('Sell failed', 'error');
+        clearAnimationClasses();
+        sellQtyRow.classList.add("neon-red-glow");
+        resetButtonUI();
+      }
+    });
+
+    sellModalBack.addEventListener('click', e => { if (e.target === sellModalBack) closeSellModal(); });
+
+    (async function init() {
+      if (!email) { 
+        showPopup('Please login first', 'error');
+        setTimeout(() => location.href='login.html', 1000);
+        return; 
+      }
+      await loadHoldings();
+      setInterval(loadHoldings, 15000);
+    })();
+  </script>
+  <script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js');
+  });
+}
+</script>
+</body>
+</html>
