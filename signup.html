@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AirBy - Sign Up</title>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <style>
+    /* Premium AirBy AMOLED Theme */
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #000000; /* Pure Black */
+      color: #ffffff;
+      overflow-x: hidden;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 414px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* AirBy Custom Logo Header Graphic Styling */
+    .brand-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .brand-logo {
+      font-size: 44px;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+
+    .brand-logo .accent-tick {
+      color: #0066ff;
+      font-weight: 900;
+      margin-left: 1px;
+    }
+
+    .brand-header p {
+      font-size: 15px;
+      color: #666666;
+      margin: 0;
+    }
+
+    /* Input Field Container Elements */
+    .input-group {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .input-row {
+      position: relative;
+      margin-bottom: 14px;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* Premium Nickname Info Layout Row Integration */
+    .nickname-container {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      position: relative;
+    }
+
+    .info-icon {
+      position: absolute;
+      right: 16px;
+      width: 20px;
+      height: 20px;
+      border: 1.5px solid #48484a;
+      color: #666666;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      z-index: 10;
+    }
+
+    .info-icon:active {
+      transform: scale(0.85);
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    input {
+      width: 100%;
+      padding: 16px;
+      background: #0b0b0c; /* Deep Matte Gray Contrast */
+      border: 1.5px solid #1c1c1e;
+      border-radius: 14px;
+      font-size: 16px;
+      color: #ffffff;
+      outline: none;
+      /* Telegram-grade elastic spring curves */
+      transition: border-color 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
+      -webkit-user-select: text;
+      user-select: text;
+    }
+
+    /* Brand Accent Blue Highlights on focus and touch */
+    input:focus {
+      border-color: #0066ff;
+      transform: scale(1.015);
+    }
+
+    input:active {
+      transform: scale(0.97);
+    }
+
+    input::placeholder {
+      color: #48484a;
+    }
+
+    /* Dynamic Slide Down Wrapper Layer for Smooth Physics Hidden Transitions */
+    .slide-wrapper {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transform: scale(0.94) translateY(-10px);
+      transition: max-height 0.4s ease, opacity 0.3s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      width: 100%;
+    }
+
+    .slide-wrapper.visible {
+      max-height: 90px;
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      margin-bottom: 14px;
+    }
+
+    /* Dynamic Border State FX Tracking classes */
+    .neon-blue-glow input {
+      border-color: #0066ff !important;
+      box-shadow: 0 0 12px rgba(0, 102, 255, 0.4);
+    }
+
+    .neon-confirming input {
+      animation: pulseGlow 1s infinite alternate;
+      border-color: #0066ff !important;
+    }
+
+    .neon-green-glow input {
+      border-color: #34c759 !important;
+      box-shadow: 0 0 12px rgba(52, 199, 89, 0.4);
+    }
+
+    .neon-red-glow input {
+      border-color: #ff3b30 !important;
+      box-shadow: 0 0 12px rgba(255, 59, 48, 0.4);
+    }
+
+    /* Error Shake Animation Definition */
+    .shake-row {
+      animation: shakePhysics 0.4s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @keyframes shakePhysics {
+      10%, 90% { transform: translate3d(-2px, 0, 0); }
+      20%, 80% { transform: translate3d(4px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+      40%, 60% { transform: translate3d(6px, 0, 0); }
+    }
+
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 4px rgba(0, 102, 255, 0.2); }
+      100% { box-shadow: 0 0 16px rgba(0, 102, 255, 0.6); }
+    }
+
+    /* High Contrast Dynamic Brand Action Button Layout */
+    .btn-wrapper {
+      max-height: 0;
+      opacity: 0;
+      width: 100%;
+      overflow: hidden;
+      transform: translateY(15px) scale(0.95);
+      transition: max-height 0.4s ease, opacity 0.3s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .btn-wrapper.reveal {
+      max-height: 90px;
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      margin-top: 10px;
+    }
+
+    .action-btn {
+      width: 100%;
+      padding: 16px;
+      background-color: #ffffff;
+      color: #000000;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease;
+    }
+
+    .action-btn:active {
+      transform: scale(0.94);
+      background-color: #e5e5e5;
+    }
+
+    /* Spinner Design Elements inside Buttons */
+    .loader-spinner {
+      width: 20px;
+      height: 20px;
+      border: 2.5px solid #000000;
+      border-top: 2.5px solid transparent;
+      border-radius: 50%;
+      animation: spinDevice 0.75s linear infinite;
+      display: none;
+    }
+
+    @keyframes spinDevice {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .footer-link {
+      margin-top: 24px;
+      font-size: 15px;
+      color: #666666;
+    }
+
+    .footer-link a {
+      color: #0066ff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    /* Pure CSS Native Premium Modal Alert Custom Sheet System */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 4000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .info-modal {
+      background: #0b0b0c;
+      border: 1.5px solid #1c1c1e;
+      border-radius: 24px;
+      padding: 24px;
+      width: 100%;
+      max-width: 340px;
+      text-align: center;
+      transform: scale(0.85) translateY(20px);
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .modal-overlay.open .info-modal {
+      transform: scale(1) translateY(0);
+    }
+
+    .info-modal h3 {
+      margin: 0 0 10px 0;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .info-modal p {
+      margin: 0 0 20px 0;
+      font-size: 14px;
+      color: #8e8e93;
+      line-height: 1.5;
+    }
+
+    .modal-close-btn {
+      width: 100%;
+      padding: 12px;
+      background: #1c1c1e;
+      border: none;
+      border-radius: 12px;
+      color: #0066ff;
+      font-size: 15px;
+      font-weight: 600;
+      transition: transform 0.1s ease;
+    }
+
+    .modal-close-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* Smart Real-time Notification Banner System */
+    .airby-toast {
+      position: fixed;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 14px 28px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffffff;
+      box-shadow: 0px 12px 30px rgba(0, 0, 0, 0.7);
+      z-index: 5000;
+      transition: top 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .airby-toast.show {
+      top: 24px;
+    }
+
+    .airby-toast.error { background-color: #ff3b30; }
+    .airby-toast.success { background-color: #34c759; }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <div class="brand-header">
+      <div class="brand-logo">AirBy<span class="accent-tick">'</span></div>
+      <p>Create your modern account</p>
+    </div>
+
+    <div class="input-group">
+      <div class="input-row"><input type="text" id="first_name" placeholder="First Name" autocomplete="off"></div>
+      <div class="input-row"><input type="text" id="last_name" placeholder="Last Name" autocomplete="off"></div>
+      
+      <div class="input-row nickname-container">
+        <input type="text" id="nickname" placeholder="Nickname (Optional)" autocomplete="off">
+        <div class="info-icon" onclick="toggleInfoModal(true)">i</div>
+      </div>
+      
+      <div class="input-row"><input type="email" id="email" placeholder="Email Address" autocomplete="off"></div>
+      <div class="input-row"><input type="password" id="password" placeholder="Password (6 characters)"></div>
+      
+      <div class="slide-wrapper" id="confirm_wrapper">
+        <div class="input-row" id="confirm_row">
+          <input type="password" id="confirm_password" placeholder="Confirm Password">
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-wrapper" id="btn_wrapper">
+      <button class="action-btn" onclick="startSignupFlow()">
+        <span id="btn_text">Continue</span>
+        <div class="loader-spinner" id="btn_loader"></div>
+      </button>
+    </div>
+
+    <div class="footer-link">
+      Already have an account? <a href="login.html">Login</a>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="info_overlay" onclick="toggleInfoModal(false)">
+    <div class="info-modal" onclick="event.stopPropagation()">
+      <h3>Nickname Details</h3>
+      <p>Nicknames are optional during registration and can also be added after registration via your user profile settings menu configuration dashboard anytime.</p>
+      <button class="modal-close-btn" onclick="toggleInfoModal(false)">Got it</button>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script>
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    emailjs.init({ publicKey: "8DlEDeQcDmEtbaUwA" });
+
+    // Track state parameters globally to prevent script conflicts
+    let passConfirmed = false;
+
+    function showPopup(message, type = "error") {
+      let toast = document.querySelector('.airby-toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.className = 'airby-toast';
+        document.body.appendChild(toast);
+      }
+      toast.className = `airby-toast ${type}`;
+      toast.innerText = message;
+      setTimeout(() => toast.classList.add('show'), 50);
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function toggleInfoModal(open) {
+      const modal = document.getElementById("info_overlay");
+      if(open) modal.classList.add("open");
+      else modal.classList.remove("open");
+    }
+
+    // Dynamic Engine Input Event Observers
+    const passwordInput = document.getElementById("password");
+    const confirmInput = document.getElementById("confirm_password");
+    const confirmWrapper = document.getElementById("confirm_wrapper");
+    const confirmRow = document.getElementById("confirm_row");
+    const btnWrapper = document.getElementById("btn_wrapper");
+
+    passwordInput.addEventListener("input", () => {
+      const passVal = passwordInput.value;
+      
+      if (passVal.length >= 6) {
+        confirmWrapper.classList.add("visible");
+      } else {
+        // Drop states out gracefully when string drops out of valid limits
+        confirmWrapper.classList.remove("visible");
+        btnWrapper.classList.remove("reveal");
+        confirmInput.value = "";
+        clearNeonClasses();
+        passConfirmed = false;
+      }
+    });
+
+    confirmInput.addEventListener("input", () => {
+      const pMain = passwordInput.value;
+      const pConf = confirmInput.value;
+
+      // When confirmation text reaches the exact length of the original password
+      if (pConf.length === pMain.length) {
+        clearNeonClasses();
+        confirmRow.classList.add("neon-blue-glow");
+        
+        // Step 2: Trigger Rotating validation look after 400ms
+        setTimeout(() => {
+          confirmRow.classList.remove("neon-blue-glow");
+          confirmRow.classList.add("neon-confirming");
+          
+          // Step 3: Run Match Calculation logic exactly 1 second later
+          setTimeout(() => {
+            confirmRow.classList.remove("neon-confirming");
+            
+            if (pMain === pConf) {
+              confirmRow.classList.add("neon-green-glow");
+              passConfirmed = true;
+              
+              // Slide down smoothly to reveal the Continue action button link
+              setTimeout(() => {
+                btnWrapper.classList.add("reveal");
+              }, 300);
+              
+            } else {
+              confirmRow.classList.add("neon-red-glow");
+              confirmRow.classList.add("shake-row");
+              passConfirmed = false;
+              btnWrapper.classList.remove("reveal");
+
+              // Wipe out incorrect entry automatically after shake presentation completes
+              setTimeout(() => {
+                confirmRow.classList.remove("shake-row");
+                confirmInput.value = "";
+                clearNeonClasses();
+              }, 800);
+            }
+          }, 1000);
+        }, 400);
+      } else {
+        // Hide button again if they change values midway
+        btnWrapper.classList.remove("reveal");
+        clearNeonClasses();
+        passConfirmed = false;
+      }
+    });
+
+    function clearNeonClasses() {
+      confirmRow.classList.remove("neon-blue-glow", "neon-confirming", "neon-green-glow", "neon-red-glow", "shake-row");
+    }
+
+    async function startSignupFlow() {
+      if (!passConfirmed) return;
+
+      const firstName = document.getElementById("first_name").value.trim();
+      const lastName = document.getElementById("last_name").value.trim();
+      const nickname = document.getElementById("nickname").value.trim();
+      const email = document.getElementById("email").value.trim().toLowerCase();
+      const password = passwordInput.value.trim();
+
+      if (!firstName || !lastName || !email || !password) {
+        showPopup("Please fill all required fields", "error");
+        return;
+      }
+
+      // Turn on high-performance button loader UI state
+      document.getElementById("btn_text").style.display = "none";
+      document.getElementById("btn_loader").style.display = "block";
+
+      try {
+        const { data: existingUser } = await supabaseClient
+          .from('users')
+          .select('*')
+          .eq('email', email)
+          .maybeSingle();
+
+        if (existingUser) {
+          showPopup("Account exists. Please login.", "error");
+          resetButtonUI();
+          return;
+        }
+
+        const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+        showPopup("Sending security code...", "success");
+
+        emailjs.send("service_z4ho8hn", "template_nyp313g", {
+          email: email,
+          otp_code: generatedOtp
+        })
+        .then(() => {
+          localStorage.setItem("pending_first_name", firstName);
+          localStorage.setItem("pending_last_name", lastName);
+          localStorage.setItem("pending_nickname", nickname);
+          localStorage.setItem("pending_email", email);
+          localStorage.setItem("pending_password", password);
+          localStorage.setItem("expected_otp", generatedOtp);
+
+          setTimeout(() => {
+            window.location.href = "otp.html";
+          }, 1200);
+        })
+        .catch((error) => {
+          console.error("EmailJS Error:", error);
+          showPopup("Failed to send code. Try again.", "error");
+          resetButtonUI();
+        });
+
+      } catch (err) {
+        showPopup("An unexpected system failure occurred.", "error");
+        resetButtonUI();
+      }
+    }
+
+    function resetButtonUI() {
+      document.getElementById("btn_text").style.display = "block";
+      document.getElementById("btn_loader").style.display = "none";
+    }
+  </script>
+</body>
+</html>
