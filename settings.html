@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>Settings - AirBy'</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0066ff">
+<style>
+:root{
+    --accent:#0066ff;
+    --bg:#000000;
+    --card:#0b0b0c;
+    --border:#1c1c1e;
+    --text:#ffffff;
+    --muted:#7d7d7d;
+    --green:#00d26a;
+    --orange:#ff9500;
+    --red:#ff3b30;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+    -webkit-user-select:none;
+    user-select:none;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+
+input{
+    -webkit-user-select:text !important;
+    user-select:text !important;
+}
+
+body{
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    min-height:100dvh;
+    overflow-x:hidden;
+}
+
+.market-background{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:1;
+    opacity:.12;
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+    padding:0 10px;
+    pointer-events:none;
+}
+
+.candle-container{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    width:12px;
+    position:relative;
+}
+
+.wick{
+    width:2px;
+    height:120px;
+    background-color:#34c759;
+}
+
+.real-body{
+    width:14px;
+    height:50px;
+    background-color:#34c759;
+    border-radius:3px;
+    position:absolute;
+    animation:marketFluctuation 4s ease-in-out infinite alternate;
+}
+
+.c1 .real-body{animation-delay:0s;height:60px;}
+.c2 .real-body{animation-delay:.8s;height:40px;}
+.c3 .real-body{animation-delay:1.5s;height:75px;}
+.c4 .real-body{animation-delay:.3s;height:35px;}
+.c5 .real-body{animation-delay:2.1s;height:55px;}
+
+@keyframes marketFluctuation{
+    0%{transform:translateY(-15px);}
+    100%{transform:translateY(15px);}
+}
+
+.app-container{
+    width:100%;
+    max-width:414px;
+    min-height:100vh;
+    min-height:100dvh;
+    margin:auto;
+    padding:calc(24px + env(safe-area-inset-top)) 24px calc(24px + env(safe-area-inset-bottom)) 24px;
+    position:relative;
+    z-index:5;
+    overflow-y:auto;
+}
+
+.top-header-row{
+    width:100%;
+    display:grid;
+    grid-template-columns:1fr auto 1fr;
+    align-items:center;
+    margin-bottom:28px;
+}
+
+.brand-logo-center{
+    font-size:26px;
+    font-weight:800;
+    letter-spacing:-1px;
+    color:#ffffff;
+    text-align:center;
+    grid-column:2;
+}
+
+.brand-logo-center .accent-tick{color:var(--accent);}
+.left-actions-group,.right-actions-group{display:flex;align-items:center;}
+.left-actions-group{justify-content:flex-start;}
+.right-actions-group{justify-content:flex-end;}
+
+.back-btn{
+    width:44px;
+    height:44px;
+    background:var(--card);
+    border:1.5px solid var(--border);
+    border-radius:14px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    transition:.2s cubic-bezier(0.34,1.56,0.64,1);
+    cursor:pointer;
+}
+
+.back-btn:active{transform:scale(.92);}
+.back-btn i{color:white;font-size:16px;}
+
+.page-title{
+    font-size:32px;
+    font-weight:800;
+    letter-spacing:-1px;
+    margin-bottom:6px;
+}
+
+.page-subtitle{
+    color:var(--muted);
+    font-size:14px;
+    margin-bottom:26px;
+    line-height:1.5;
+}
+
+.balance-card{
+    background:var(--card);
+    border:1.5px solid var(--border);
+    border-radius:24px;
+    padding:20px;
+    margin-bottom:24px;
+    box-shadow:0 10px 30px rgba(0,0,0,.5);
+    animation:fadeIn .4s ease;
+}
+
+.balance-label{
+    font-size:13px;
+    color:var(--muted);
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    margin-bottom:8px;
+}
+
+.balance-amount{
+    font-size:34px;
+    font-weight:800;
+    letter-spacing:-1px;
+}
+
+.setting-card{
+    background:var(--card);
+    border:1.5px solid var(--border);
+    border-radius:24px;
+    margin-bottom:16px;
+    overflow:hidden;
+    transition:all .3s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+.setting-header{
+    padding:20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    cursor:pointer;
+    transition:background .2s;
+}
+
+.setting-header:active{
+    background:rgba(255,255,255,.03);
+}
+
+.setting-left{
+    display:flex;
+    align-items:center;
+    gap:14px;
+}
+
+.setting-icon{
+    width:48px;
+    height:48px;
+    border-radius:16px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:20px;
+    flex-shrink:0;
+}
+
+.icon-email{background:rgba(0,102,255,.12);color:var(--accent);}
+.icon-password{background:rgba(255,149,0,.12);color:var(--orange);}
+.icon-name{background:rgba(0,210,106,.12);color:var(--green);}
+
+.setting-title{
+    font-size:16px;
+    font-weight:700;
+    margin-bottom:4px;
+}
+
+.setting-desc{
+    font-size:12px;
+    color:var(--muted);
+}
+
+.setting-arrow{
+    font-size:16px;
+    color:var(--muted);
+    transition:transform .3s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+.setting-card.expanded .setting-arrow{
+    transform:rotate(90deg);
+}
+
+.setting-content{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .4s cubic-bezier(0.34,1.56,0.64,1), padding .4s;
+}
+
+.setting-card.expanded .setting-content{
+    max-height:600px;
+    padding:0 20px 20px 20px;
+}
+
+.input-group{
+    margin-bottom:16px;
+}
+
+.input-label{
+    font-size:12px;
+    color:var(--muted);
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    margin-bottom:8px;
+}
+
+.input-field{
+    width:100%;
+    background:#050505;
+    border:1.5px solid var(--border);
+    border-radius:16px;
+    padding:14px 16px;
+    color:white;
+    font-size:15px;
+    font-weight:600;
+    transition:border-color .2s;
+}
+
+.input-field:focus{
+    border-color:var(--accent);
+    outline:none;
+}
+
+.fee-note{
+    background:rgba(0,102,255,.08);
+    border:1px solid rgba(0,102,255,.15);
+    border-radius:14px;
+    padding:12px 14px;
+    font-size:12px;
+    color:#9a9a9a;
+    margin-bottom:16px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.fee-note i{
+    color:var(--accent);
+    font-size:16px;
+}
+
+.reset-btn{
+    width:100%;
+    border:none;
+    border-radius:18px;
+    background:var(--accent);
+    color:white;
+    font-size:15px;
+    font-weight:800;
+    padding:16px;
+    cursor:pointer;
+    transition:.25s cubic-bezier(0.34,1.56,0.64,1);
+    box-shadow:0 10px 25px rgba(0,102,255,.25);
+    display:none;
+}
+
+.reset-btn.show{
+    display:block;
+    animation:fadeIn .3s ease;
+}
+
+.reset-btn:active{transform:scale(.98);}
+
+.reset-btn:disabled{
+    opacity:.5;
+    cursor:not-allowed;
+}
+
+.support-card{
+    background:var(--card);
+    border:1.5px solid var(--border);
+    border-radius:24px;
+    padding:20px;
+    margin-top:24px;
+    text-align:center;
+}
+
+.support-title{
+    font-size:14px;
+    font-weight:700;
+    margin-bottom:12px;
+}
+
+.support-email{
+    font-size:13px;
+    color:var(--accent);
+    font-weight:600;
+    margin-bottom:14px;
+    word-break:break-all;
+}
+
+.copy-btn{
+    border:1.5px solid var(--border);
+    background:#050505;
+    color:white;
+    border-radius:14px;
+    padding:12px 20px;
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+    transition:.2s;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+}
+
+.copy-btn:active{
+    transform:scale(.95);
+    border-color:var(--accent);
+}
+
+/* MODAL */
+.modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.85);
+    backdrop-filter:blur(8px);
+    z-index:99999;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    opacity:0;
+    pointer-events:none;
+    transition:.3s ease;
+    padding:24px;
+}
+
+.modal-overlay.active{
+    opacity:1;
+    pointer-events:auto;
+}
+
+.modal-content{
+    background:var(--card);
+    border:1.5px solid var(--border);
+    border-radius:28px;
+    padding:28px 24px;
+    max-width:360px;
+    width:100%;
+    transform:scale(.9);
+    transition:.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+.modal-overlay.active .modal-content{
+    transform:scale(1);
+}
+
+.modal-icon{
+    width:64px;
+    height:64px;
+    border-radius:20px;
+    background:rgba(0,102,255,.12);
+    color:var(--accent);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:28px;
+    margin:0 auto 20px auto;
+}
+
+.modal-title{
+    font-size:22px;
+    font-weight:800;
+    text-align:center;
+    margin-bottom:10px;
+}
+
+.modal-text{
+    font-size:14px;
+    color:var(--muted);
+    text-align:center;
+    line-height:1.6;
+    margin-bottom:24px;
+}
+
+.modal-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+}
+
+.modal-btn{
+    border:none;
+    border-radius:16px;
+    padding:14px;
+    font-size:15px;
+    font-weight:800;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.modal-btn-cancel{
+    background:#1c1c1e;
+    color:white;
+}
+
+.modal-btn-confirm{
+    background:var(--accent);
+    color:white;
+    box-shadow:0 8px 20px rgba(0,102,255,.3);
+}
+
+.modal-btn:active{
+    transform:scale(.95);
+}
+
+#toast{
+    position:fixed;
+    top:-100px;
+    left:50%;
+    transform:translateX(-50%);
+    padding:14px 22px;
+    border-radius:22px;
+    font-size:14px;
+    font-weight:700;
+    color:white;
+    background:#111;
+    border:1px solid rgba(255,255,.08);
+    z-index:999999;
+    transition:.4s cubic-bezier(.175,.885,.32,1.275);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    box-shadow:0 18px 35px rgba(0,0,0,.55);
+    max-width:90%;
+}
+
+#toast.show{top:calc(25px + env(safe-area-inset-top));}
+#toast.success{background:#00c851;border:none;}
+#toast.error{background:#ff3b30;border:none;}
+
+@keyframes fadeIn{
+    from{opacity:0;transform:translateY(12px);}
+    to{opacity:1;transform:translateY(0);}
+}
+</style>
+</head>
+<body>
+
+<div class="market-background">
+    <div class="candle-container c1"><div class="wick"></div><div class="real-body"></div></div>
+    <div class="candle-container c2"><div class="wick"></div><div class="real-body"></div></div>
+    <div class="candle-container c3"><div class="wick"></div><div class="real-body"></div></div>
+    <div class="candle-container c4"><div class="wick"></div><div class="real-body"></div></div>
+    <div class="candle-container c5"><div class="wick"></div><div class="real-body"></div></div>
+</div>
+
+<div id="toast"></div>
+
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal-content">
+        <div class="modal-icon">
+            <i class="fa-solid fa-circle-question"></i>
+        </div>
+        <div class="modal-title" id="modalTitle">Confirm Action</div>
+        <div class="modal-text" id="modalText"></div>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal()">Cancel</button>
+            <button class="modal-btn modal-btn-confirm" id="confirmBtn">Yes, Reset</button>
+        </div>
+    </div>
+</div>
+
+<div class="app-container">
+
+    <div class="top-header-row">
+    <div class="left-actions-group">
+        <div class="back-btn" onclick="window.location.href='index.html'">
+            <i class="fa-solid fa-arrow-left"></i>
+        </div>
+    </div>  <!-- ← ADD THIS CLOSING TAG -->
+    <div class="brand-logo-center">AirBy<span class="accent-tick">'</span></div>
+    <div class="right-actions-group"></div>
+</div>
+
+    <div class="page-title">Settings</div>
+    <div class="page-subtitle">Manage your account details. Fees apply for changes.</div>
+
+    <div class="balance-card">
+        <div class="balance-label">Available Balance</div>
+        <div class="balance-amount" id="userBalance">₦0</div>
+    </div>
+
+    <!-- RESET EMAIL -->
+<div class="setting-card" id="emailCard">
+    <div class="setting-header" onclick="toggleCard('emailCard')">
+        <div class="setting-left">
+            <div class="setting-icon icon-email">
+                <i class="fa-solid fa-envelope"></i>
+            </div>
+            <div>
+                <div class="setting-title">Reset Email</div>
+                <div class="setting-desc">Fee: ₦2,000</div>
+            </div>
+        </div>  <!-- ← ADD THIS LINE -->
+        <i class="fa-solid fa-chevron-right setting-arrow"></i>
+    </div>
+    <div class="setting-content">
+            <div class="input-group">
+                <div class="input-label">Current Email</div>
+                <input type="email" class="input-field" id="currentEmail" placeholder="Enter current email">
+            </div>
+            <div class="input-group">
+                <div class="input-label">New Email</div>
+                <input type="email" class="input-field" id="newEmail" placeholder="Enter new email">
+            </div>
+            <div class="input-group">
+                <div class="input-label">Confirm New Email</div>
+                <input type="email" class="input-field" id="confirmEmail" placeholder="Confirm new email">
+            </div>
+            <div class="fee-note">
+                <i class="fa-solid fa-circle-info"></i>
+                <span>A fee of ₦2,000 will be deducted from your balance to reset email</span>
+            </div>
+            <button class="reset-btn" id="emailResetBtn" onclick="validateEmailReset()">Reset Email</button>
+        </div>
+    </div>
+
+    <!-- RESET PASSWORD -->
+    <div class="setting-card" id="passwordCard">
+        <div class="setting-header" onclick="toggleCard('passwordCard')">
+            <div class="setting-left">
+                <div class="setting-icon icon-password">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <div>
+                    <div class="setting-title">Reset Password</div>
+                    <div class="setting-desc">Fee: ₦500</div>
+                </div>
+            </div>
+            <i class="fa-solid fa-chevron-right setting-arrow"></i>
+        </div>
+        <div class="setting-content">
+            <div class="input-group">
+                <div class="input-label">Current Password</div>
+                <input type="password" class="input-field" id="currentPassword" placeholder="Enter current password">
+            </div>
+            <div class="input-group">
+                <div class="input-label">New Password</div>
+                <input type="password" class="input-field" id="newPassword" placeholder="Enter new password">
+            </div>
+            <div class="input-group">
+                <div class="input-label">Confirm New Password</div>
+                <input type="password" class="input-field" id="confirmPassword" placeholder="Confirm new password">
+            </div>
+            <div class="fee-note">
+                <i class="fa-solid fa-circle-info"></i>
+                <span>A fee of ₦500 will be deducted from your balance to reset password</span>
+            </div>
+            <button class="reset-btn" id="passwordResetBtn" onclick="validatePasswordReset()">Reset Password</button>
+        </div>
+    </div>
+
+    <!-- RESET NAMES -->
+    <div class="setting-card" id="namesCard">
+        <div class="setting-header" onclick="toggleCard('namesCard')">
+            <div class="setting-left">
+                <div class="setting-icon icon-name">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <div>
+                    <div class="setting-title">Reset Names</div>
+                    <div class="setting-desc">Fee: ₦700</div>
+                </div>
+            </div>
+            <i class="fa-solid fa-chevron-right setting-arrow"></i>
+        </div>
+        <div class="setting-content">
+            <div class="input-group">
+                <div class="input-label">Current First Name</div>
+                <input type="text" class="input-field" id="currentFirstName" placeholder="Enter current first name">
+            </div>
+            <div class="input-group">
+                <div class="input-label">Current Last Name</div>
+                <input type="text" class="input-field" id="currentLastName" placeholder="Enter current last name">
+            </div>
+            <div class="input-group">
+                <div class="input-label">New First Name</div>
+                <input type="text" class="input-field" id="newFirstName" placeholder="Enter new first name">
+            </div>
+            <div class="input-group">
+                <div class="input-label">New Last Name</div>
+                <input type="text" class="input-field" id="newLastName" placeholder="Enter new last name">
+            </div>
+            <div class="fee-note">
+                <i class="fa-solid fa-circle-info"></i>
+                <span>A fee of ₦700 will be deducted from your balance to reset names</span>
+            </div>
+            <button class="reset-btn" id="namesResetBtn" onclick="validateNamesReset()">Reset Names</button>
+        </div>
+    </div>
+
+    <!-- SUPPORT -->
+    <div class="support-card">
+        <div class="support-title">Customer Support</div>
+        <div class="support-email">airby.hi.mail@gmail.com</div>
+        <button class="copy-btn" onclick="copyToClipboard('airby.hi.mail@gmail.com', 'Email')">
+            <i class="fa-solid fa-copy"></i>
+            Copy Email
+        </button>
+    </div>
+
+</div>
+
+<script>
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let currentUser = null;
+let currentAction = null;
+
+function showToast(message, success = true){
+    const toast = document.getElementById("toast");
+    toast.className = success ? "success" : "error";
+    toast.innerHTML = success
+    ? `<i class="fa-solid fa-circle-check"></i> ${message}`
+    : `<i class="fa-solid fa-circle-exclamation"></i> ${message}`;
+    toast.classList.add("show");
+    setTimeout(()=>{toast.classList.remove("show");},3000);
+}
+
+function copyToClipboard(text, label){
+    navigator.clipboard.writeText(text).then(()=>{
+        showToast(`${label} copied`, true);
+    }).catch(()=>{
+        showToast("Copy failed", false);
+    });
+}
+
+function toggleCard(cardId){
+    const cards = document.querySelectorAll('.setting-card');
+    cards.forEach(card => {
+        if(card.id === cardId){
+            card.classList.toggle('expanded');
+        }else{
+            card.classList.remove('expanded');
+        }
+    });
+}
+
+async function loadUserData(){
+    const userEmail = localStorage.getItem("user_email");
+    if(!userEmail){
+        window.location.href = "login.html";
+        return;
+    }
+    
+    const { data, error } = await supabaseClient
+        .from("users")
+        .select("*")
+        .eq("email", userEmail.toLowerCase())
+        .single();
+    
+    if(error || !data){
+        showToast("Failed to load user data", false);
+        return;
+    }
+    
+    currentUser = data;
+    document.getElementById("userBalance").innerText = `₦${Number(data.balance || 0).toLocaleString()}`;
+}
+
+function validateEmailReset(){
+    const currentEmail = document.getElementById("currentEmail").value.trim().toLowerCase();
+    const newEmail = document.getElementById("newEmail").value.trim().toLowerCase();
+    const confirmEmail = document.getElementById("confirmEmail").value.trim().toLowerCase();
+    
+    if(!currentEmail || !newEmail || !confirmEmail){
+        showToast("Please fill all fields", false);
+        return;
+    }
+    
+    if(currentEmail !== currentUser.email.toLowerCase()){
+        showToast("Current email is incorrect", false);
+        return;
+    }
+    
+    if(newEmail !== confirmEmail){
+        showToast("New emails do not match", false);
+        return;
+    }
+    
+    if(newEmail === currentEmail){
+        showToast("Email is same as current", false);
+        return;
+    }
+    
+    if(currentUser.balance < 2000){
+        showToast("Insufficient balance", false);
+        return;
+    }
+    
+    currentAction = { type: 'email', value: newEmail, fee: 2000 };
+    showConfirmModal("Reset Email", `Do you want to reset email to ${newEmail}? ₦2,000 will be deducted.`);
+}
+
+async function validatePasswordReset(){
+    const currentPassword = document.getElementById("currentPassword").value;
+    const newPassword = document.getElementById("newPassword").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+    
+    if(!currentPassword || !newPassword || !confirmPassword){
+        showToast("Please fill all fields", false);
+        return;
+    }
+    
+    if(newPassword !== confirmPassword){
+        showToast("New passwords do not match", false);
+        return;
+    }
+    
+    if(newPassword === currentPassword){
+        showToast("Password is same as current", false);
+        return;
+    }
+    
+    if(newPassword.length < 6){
+        showToast("Password must be at least 6 characters", false);
+        return;
+    }
+    
+    if(currentUser.balance < 500){
+        showToast("Insufficient balance", false);
+        return;
+    }
+    
+    currentAction = { type: 'password', value: newPassword, fee: 500 };
+    showConfirmModal("Reset Password", `Do you want to reset your password? ₦500 will be deducted.`);
+}
+
+function validateNamesReset(){
+    const currentFirstName = document.getElementById("currentFirstName").value.trim();
+    const currentLastName = document.getElementById("currentLastName").value.trim();
+    const newFirstName = document.getElementById("newFirstName").value.trim();
+    const newLastName = document.getElementById("newLastName").value.trim();
+    
+    if(!currentFirstName || !currentLastName || !newFirstName || !newLastName){
+        showToast("Please fill all fields", false);
+        return;
+    }
+    
+    if(currentFirstName.toLowerCase() !== (currentUser.first_name || '').toLowerCase() || 
+       currentLastName.toLowerCase() !== (currentUser.last_name || '').toLowerCase()){
+        showToast("Current names are incorrect", false);
+        return;
+    }
+    
+    if(newFirstName.toLowerCase() === currentFirstName.toLowerCase() && 
+       newLastName.toLowerCase() === currentLastName.toLowerCase()){
+        showToast("Names are same as current", false);
+        return;
+    }
+    
+    if(currentUser.balance < 700){
+        showToast("Insufficient balance", false);
+        return;
+    }
+    
+    currentAction = { type: 'names', value: `${newFirstName}|${newLastName}`, fee: 700 };
+    showConfirmModal("Reset Names", `Do you want to reset names to ${newFirstName} ${newLastName}? ₦700 will be deducted.`);
+}
+
+function showConfirmModal(title, text){
+    document.getElementById("modalTitle").innerText = title;
+    document.getElementById("modalText").innerText = text;
+    document.getElementById("confirmModal").classList.add("active");
+}
+
+function closeModal(){
+    document.getElementById("confirmModal").classList.remove("active");
+    currentAction = null;
+}
+
+document.getElementById("confirmBtn").addEventListener("click", async ()=>{
+    if(!currentAction){
+        showToast("Session expired. Please try again", false);
+        closeModal();
+        return;
+    }
+    
+    const actionToProcess = currentAction;
+    closeModal();
+    showToast("Processing...", true);
+    
+    try{
+        let rpcName = 'deduct_balance_and_update_profile';
+        let params = {
+            p_user_id: currentUser.id, // This is 245, now works with bigint
+            p_amount: actionToProcess.fee,
+            p_field: actionToProcess.type,
+            p_new_value: actionToProcess.value
+        };
+        
+        if(actionToProcess.type === 'password'){
+            rpcName = 'deduct_balance_and_update_password';
+            params = {
+                p_user_id: currentUser.id,
+                p_amount: actionToProcess.fee,
+                p_new_password: actionToProcess.value
+            };
+            // DELETE THIS: You don't use Supabase Auth
+            // const { error: authError } = await supabaseClient.auth.updateUser({...});
+        }
+        
+        const { data, error } = await supabaseClient.rpc(rpcName, params);
+        
+        if(error){
+            console.log("RPC Error:", error);
+            showToast("Update failed: " + error.message, false);
+            return;
+        }
+        
+        if(!data || data.success !== true){
+            showToast(data?.message || "Update failed", false);
+            return;
+        }
+        
+        showToast(`${actionToProcess.type === 'email' ? 'Email' : actionToProcess.type === 'password' ? 'Password' : 'Names'} updated successfully`, true);
+        currentUser.balance = data.new_balance;
+        document.getElementById("userBalance").innerText = `₦${Number(data.new_balance).toLocaleString()}`;
+        
+        document.querySelectorAll('.input-field').forEach(input => input.value = '');
+        document.querySelectorAll('.setting-card').forEach(card => card.classList.remove('expanded'));
+        document.querySelectorAll('.reset-btn').forEach(btn => btn.classList.remove('show'));
+        
+        if(actionToProcess.type === 'email'){
+            localStorage.setItem("user_email", actionToProcess.value);
+            currentUser.email = actionToProcess.value;
+        }
+        
+    }catch(err){
+        console.log("Catch Error:", err);
+        showToast(err.message || "Network error", false);
+    }
+});
+
+// Show reset button when inputs are valid
+document.getElementById("newEmail").addEventListener("input", checkEmailInputs);
+document.getElementById("confirmEmail").addEventListener("input", checkEmailInputs);
+document.getElementById("currentEmail").addEventListener("input", checkEmailInputs);
+
+function checkEmailInputs(){
+    const current = document.getElementById("currentEmail").value.trim();
+    const newEmail = document.getElementById("newEmail").value.trim();
+    const confirm = document.getElementById("confirmEmail").value.trim();
+    const btn = document.getElementById("emailResetBtn");
+    
+    if(current && newEmail && confirm && newEmail === confirm && newEmail !== current){
+        btn.classList.add("show");
+    }else{
+        btn.classList.remove("show");
+    }
+}
+
+document.getElementById("newPassword").addEventListener("input", checkPasswordInputs);
+document.getElementById("confirmPassword").addEventListener("input", checkPasswordInputs);
+document.getElementById("currentPassword").addEventListener("input", checkPasswordInputs);
+
+function checkPasswordInputs(){
+    const current = document.getElementById("currentPassword").value;
+    const newPass = document.getElementById("newPassword").value;
+    const confirm = document.getElementById("confirmPassword").value;
+    const btn = document.getElementById("passwordResetBtn");
+    
+    if(current && newPass && confirm && newPass === confirm && newPass !== current && newPass.length >= 6){
+        btn.classList.add("show");
+    }else{
+        btn.classList.remove("show");
+    }
+}
+
+document.getElementById("newFirstName").addEventListener("input", checkNameInputs);
+document.getElementById("newLastName").addEventListener("input", checkNameInputs);
+document.getElementById("currentFirstName").addEventListener("input", checkNameInputs);
+document.getElementById("currentLastName").addEventListener("input", checkNameInputs);
+
+function checkNameInputs(){
+    const cf = document.getElementById("currentFirstName").value.trim();
+    const cl = document.getElementById("currentLastName").value.trim();
+    const nf = document.getElementById("newFirstName").value.trim();
+    const nl = document.getElementById("newLastName").value.trim();
+    const btn = document.getElementById("namesResetBtn");
+    
+    if(cf && cl && nf && nl && (nf !== cf || nl !== cl)){
+        btn.classList.add("show");
+    }else{
+        btn.classList.remove("show");
+    }
+}
+
+window.addEventListener("DOMContentLoaded", loadUserData);
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js');
+  });
+}
+</script>
+</body>
+</html>
