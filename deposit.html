@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  />
+
+  <title>AirBy' - Deposit</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script src="https://checkout.flutterwave.com/v3.js"></script>
+
+  <script src="config.js"></script>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0066ff">
+  <style>
+
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    body {
+      margin: 0;
+      background: #000000;
+      color: #ffffff;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    .market-background {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      opacity: 0.12;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 10px;
+      pointer-events: none;
+    }
+
+    .candle-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 12px;
+      position: relative;
+    }
+
+    .wick {
+      width: 2px;
+      height: 120px;
+      background-color: #34c759;
+    }
+
+    .real-body {
+      width: 14px;
+      height: 50px;
+      background-color: #34c759;
+      border-radius: 3px;
+      position: absolute;
+      animation: marketFluctuation 4s ease-in-out infinite alternate;
+    }
+
+    .c1 .real-body { animation-delay: 0s; height: 60px; }
+    .c2 .real-body { animation-delay: 0.8s; height: 40px; }
+    .c3 .real-body { animation-delay: 1.5s; height: 75px; }
+    .c4 .real-body { animation-delay: 0.3s; height: 35px; }
+    .c5 .real-body { animation-delay: 2.1s; height: 55px; }
+
+    @keyframes marketFluctuation {
+      0% { transform: translateY(-15px); }
+      100% { transform: translateY(15px); }
+    }
+
+    .app-container {
+      position: relative;
+      z-index: 10;
+      max-width: 414px;
+      margin: auto;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 26px;
+    }
+
+    .back-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: #0b0b0c;
+      border: 1.5px solid #1c1c1e;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #ffffff;
+      font-size: 20px;
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    .back-btn:active {
+      transform: scale(0.92);
+    }
+
+    .brand-title {
+      font-size: 25px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .brand-title span {
+      color: #0066ff;
+    }
+
+    .page-heading {
+      margin-bottom: 22px;
+    }
+
+    .page-heading h1 {
+      margin: 0;
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .page-heading p {
+      margin-top: 6px;
+      color: #7d7d7d;
+      font-size: 14px;
+    }
+
+    .wallet-card {
+      width: 100%;
+      background: #0b0b0c;
+      border: 1.5px solid #1c1c1e;
+      border-radius: 24px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .wallet-card span {
+      font-size: 13px;
+      color: #666666;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .wallet-card h2 {
+      margin: 8px 0 0 0;
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .deposit-panel {
+      background: #0b0b0c;
+      border: 1.5px solid #1c1c1e;
+      border-radius: 24px;
+      padding: 22px;
+    }
+
+    .deposit-panel h3 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .deposit-panel p {
+      margin-top: 8px;
+      color: #7d7d7d;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .amount-box {
+      margin-top: 24px;
+      background: #050505;
+      border: 1.5px solid #1c1c1e;
+      border-radius: 22px;
+      padding: 18px;
+      transition: 0.3s;
+    }
+
+    .amount-box:focus-within {
+      border-color: #0066ff;
+      box-shadow: 0 0 25px rgba(0,102,255,0.15);
+    }
+
+    .amount-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .amount-top span {
+      color: #7d7d7d;
+      font-size: 13px;
+    }
+
+    .currency-tag {
+      color: #0066ff;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .amount-input {
+      width: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: white;
+      font-size: 40px;
+      font-weight: 800;
+    }
+
+    .amount-input::placeholder {
+      color: #333;
+    }
+
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .quick-btn {
+      background: #050505;
+      border: 1.5px solid #1c1c1e;
+      color: #ffffff;
+      border-radius: 18px;
+      padding: 14px 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    .quick-btn:active {
+      transform: scale(0.92);
+      border-color: #0066ff;
+      background: rgba(0,102,255,0.05);
+    }
+
+    .info-box {
+      margin-top: 22px;
+      background: rgba(0,102,255,0.05);
+      border: 1px solid rgba(0,102,255,0.15);
+      border-radius: 18px;
+      padding: 16px;
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .info-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: rgba(0,102,255,0.12);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .info-text strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .info-text span {
+      font-size: 12px;
+      color: #9a9a9a;
+      line-height: 1.5;
+    }
+
+    .deposit-btn {
+      width: 100%;
+      height: 62px;
+      border: none;
+      border-radius: 22px;
+      margin-top: 24px;
+      background: #0066ff;
+      color: #ffffff;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+      box-shadow: 0 12px 30px rgba(0,102,255,0.3);
+    }
+
+    .deposit-btn:active {
+      transform: scale(0.97);
+    }
+
+    .secure-label {
+      margin-top: 18px;
+      text-align: center;
+      color: #5f5f5f;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .airby-toast {
+      position: fixed;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #111111;
+      border: 1px solid #1c1c1e;
+      color: #ffffff;
+      padding: 14px 22px;
+      border-radius: 18px;
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 99999;
+      transition: top 0.35s cubic-bezier(0.175,0.885,0.32,1.275);
+      box-shadow: 0 14px 30px rgba(0,0,0,0.6);
+    }
+
+    .airby-toast.reveal {
+      top: 24px;
+    }
+
+    .loader-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.82);
+      backdrop-filter: blur(8px);
+      z-index: 999999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.3s ease;
+    }
+
+    .loader-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .spinner {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      border: 5px solid rgba(255,255,255,0.08);
+      border-top: 5px solid #0066ff;
+      animation: spin 1s linear infinite;
+      margin-bottom: 18px;
+    }
+
+    @keyframes spin {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loader-overlay h3 {
+      margin: 0;
+      font-size: 21px;
+      font-weight: 700;
+    }
+
+    .loader-overlay p {
+      margin-top: 8px;
+      color: #9a9a9a;
+      font-size: 13px;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="market-background">
+
+    <div class="candle-container c1">
+      <div class="wick"></div>
+      <div class="real-body"></div>
+    </div>
+
+    <div class="candle-container c2">
+      <div class="wick"></div>
+      <div class="real-body"></div>
+    </div>
+
+    <div class="candle-container c3">
+      <div class="wick"></div>
+      <div class="real-body"></div>
+    </div>
+
+    <div class="candle-container c4">
+      <div class="wick"></div>
+      <div class="real-body"></div>
+    </div>
+
+    <div class="candle-container c5">
+      <div class="wick"></div>
+      <div class="real-body"></div>
+    </div>
+
+  </div>
+
+  <div class="airby-toast" id="toast"></div>
+
+  <div class="loader-overlay" id="loader">
+
+    <div class="spinner"></div>
+
+    <h3>Verifying Deposit</h3>
+
+    <p>Please wait while we update your wallet...</p>
+
+  </div>
+
+  <div class="app-container">
+
+    <div class="top-bar">
+
+      <div class="back-btn" onclick="window.location.href='index.html'">
+        ←
+      </div>
+
+      <div class="brand-title">
+        AirBy<span>'</span>
+      </div>
+
+      <div style="width:44px;"></div>
+
+    </div>
+
+    <div class="page-heading">
+      <h1>Deposit</h1>
+      <p>Fund your trading wallet instantly with Flutterwave.</p>
+    </div>
+
+    <div class="wallet-card">
+      <span>Available Balance</span>
+      <h2 id="walletBalance">₦0</h2>
+    </div>
+
+    <div class="deposit-panel">
+
+      <h3>Add Funds</h3>
+
+      <p>
+        Deposits are automatically credited immediately after successful verification.
+      </p>
+
+      <div class="amount-box">
+
+        <div class="amount-top">
+          <span>Deposit Amount</span>
+          <div class="currency-tag">NGN</div>
+        </div>
+
+        <input
+          type="number"
+          id="amount"
+          class="amount-input"
+          placeholder="0"
+        />
+
+      </div>
+
+      <div class="quick-grid">
+
+        <button class="quick-btn" onclick="setAmount(1000)">₦1K</button>
+
+        <button class="quick-btn" onclick="setAmount(5000)">₦5K</button>
+
+        <button class="quick-btn" onclick="setAmount(10000)">₦10K</button>
+
+        <button class="quick-btn" onclick="setAmount(20000)">₦20K</button>
+
+        <button class="quick-btn" onclick="setAmount(50000)">₦50K</button>
+
+        <button class="quick-btn" onclick="setAmount(100000)">₦100K</button>
+
+      </div>
+
+      <div class="info-box">
+
+        <div class="info-icon">
+          ⚡
+        </div>
+
+        <div class="info-text">
+
+          <strong>Instant Credit System</strong>
+
+          <span>
+            Wallet balance updates automatically after successful payment confirmation.
+          </span>
+
+        </div>
+
+      </div>
+
+      <button class="deposit-btn" onclick="startDeposit()">
+        Deposit Now
+      </button>
+
+      <div class="secure-label">
+        secured by flutterwave
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+
+    const supabaseClient = supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
+
+    const userEmail =
+      localStorage.getItem('user_email');
+
+    const walletBalance =
+      document.getElementById('walletBalance');
+
+    async function loadWalletBalance() {
+
+      if (!userEmail) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const { data, error } = await supabaseClient
+
+        .from('users')
+
+        .select('balance')
+
+        .eq('email', userEmail.toLowerCase())
+
+        .maybeSingle();
+
+      if (error || !data) return;
+
+      walletBalance.innerText =
+        `₦${Number(data.balance || 0).toLocaleString()}`;
+    }
+
+    loadWalletBalance();
+
+    function setAmount(amount) {
+
+      document.getElementById('amount').value = amount;
+    }
+
+    function showToast(message) {
+
+      const toast =
+        document.getElementById('toast');
+
+      toast.innerText = message;
+
+      toast.classList.add('reveal');
+
+      setTimeout(() => {
+
+        toast.classList.remove('reveal');
+
+      }, 3000);
+    }
+
+    function showLoader() {
+
+      document
+        .getElementById('loader')
+        .classList.add('active');
+    }
+
+    function hideLoader() {
+
+      document
+        .getElementById('loader')
+        .classList.remove('active');
+    }
+
+    function startDeposit() {
+
+      const amount =
+        Number(document.getElementById('amount').value);
+
+      if (!userEmail) {
+
+        showToast('Session expired');
+        return;
+      }
+
+      if (!amount || amount < 1000) {
+
+        showToast('Minimum deposit is ₦1,000');
+        return;
+      }
+
+      const txRef =
+        'AIRBY-' + Date.now();
+
+      FlutterwaveCheckout({
+
+        public_key:
+          'FLWPUBK-4b9baac52d43aa02765923e58050f152-X',
+
+        tx_ref: txRef,
+
+        amount: amount,
+
+        currency: 'NGN',
+
+        payment_options: 'card,banktransfer,ussd',
+
+        customer: {
+          email: userEmail
+        },
+
+        customizations: {
+
+          title: "AirBy'",
+
+          description: 'Wallet Deposit',
+
+          logo:
+            'https://img.icons8.com/fluency/96/money.png'
+        },
+
+        callback: async function(payment) {
+
+          showLoader();
+
+          try {
+
+            const response = await fetch('https://vwcknviabngqvncggeac.supabase.co/functions/v1/verify-flutterwave',
+
+              {
+                method: 'POST',
+
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+
+                body: JSON.stringify({
+
+                  transaction_id:
+                    payment.transaction_id,
+
+                  tx_ref: txRef,
+
+                  email: userEmail,
+
+                  amount: amount
+                })
+              }
+            );
+
+            const result =
+              await response.json();
+
+            hideLoader();
+
+            if (result.success) {
+
+  walletBalance.innerText =
+    `₦${Number(result.new_balance).toLocaleString()}`;
+
+  document.getElementById('amount').value = '';
+
+  showToast('Deposit successful');
+
+  // ADD THIS NOTIFICATION CODE START
+  try {
+    await supabaseClient
+      .from('notifications')
+      .insert({
+        user_email: userEmail.toLowerCase(),
+        title: 'Deposit Successful',
+        body: `Your wallet has been credited with ₦${Number(amount).toLocaleString()}`,
+        type: 'deposit',
+        read: false
+      });
+  } catch (notifErr) {
+    console.log('Notification failed:', notifErr);
+  }
+  // ADD THIS NOTIFICATION CODE END
+
+} else {
+
+              showToast(
+                result.message || 'Verification failed'
+              );
+            }
+
+          } catch (error) {
+
+            hideLoader();
+
+            showToast('Network error');
+
+            console.log(error);
+          }
+        },
+
+        onclose: function() {
+
+          showToast('Payment cancelled');
+        }
+      });
+    }
+
+    function initializeRealtimeBalanceChannel() {
+
+      supabaseClient
+
+        .channel('deposit-realtime-balance')
+
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'users',
+            filter: `email=eq.${userEmail.toLowerCase()}`
+          },
+
+          (payload) => {
+
+            if (payload.new?.balance !== undefined) {
+
+              walletBalance.innerText =
+                `₦${Number(payload.new.balance).toLocaleString()}`;
+            }
+          }
+        )
+
+        .subscribe();
+    }
+
+    initializeRealtimeBalanceChannel();
+
+  </script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js');
+  });
+}
+</script>
+</body>
+</html>
