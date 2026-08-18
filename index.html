@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0066ff">
+<title>Download AirBy – Trade Smarter. Fly Higher.</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* === NO COPY / NO BLUE HIGHLIGHT - iOS FIX === */
+*{ -webkit-tap-highlight-color: transparent!important; -webkit-touch-callout: none!important; -webkit-user-select: none!important; -moz-user-select: none!important; -ms-user-select: none!important; user-select: none!important; }
+*::selection{ background: transparent!important; }
+*::-moz-selection{ background: transparent!important; }
+html, body{ -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: rgba(0,0,0,0); }
+img{ -webkit-touch-callout: none; pointer-events: none; }
+a, button{ -webkit-touch-callout: none; }
+
+:root{ --bg:#020617; --blue:#0066ff; --blue2:#0A84FF; --text:#fff; --muted:#8a94a7; --green:#00d188; --wrap:1120px; --pad:20px; }
+*{box-sizing:border-box} html{scroll-behavior:smooth}
+body{margin:0;font-family:"Poppins",sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+a{color:inherit;text-decoration:none} img,canvas{display:block;max-width:100%}
+.wrap{width:100%;max-width:var(--wrap);margin:0 auto;padding:0 var(--pad);}
+.topbar{position:fixed;top:0;left:0;right:0;z-index:60;backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%); background:rgba(2,6,23,0.55); border-bottom:1px solid rgba(255,255,255,0.08);}
+.topbar__in{max-width:var(--wrap);margin:0 auto;padding:12px var(--pad);display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.brand-mini{display:flex;align-items:center;gap:10px;font-weight:700}
+.brand-mini img{width:32px;height:32px;border-radius:9px;box-shadow:0 0 18px rgba(0,102,255,0.4);object-fit:cover; pointer-events:auto;}
+.brand-mini span{font-size:18px}.by{color:var(--blue2)}
+.dl-small{font-size:13px;font-weight:700;padding:9px 16px;border-radius:999px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);backdrop-filter:blur(16px);color:#eaf2ff;transition:.2s}
+.dl-small:active{transform:scale(0.96)}
+.hero{position:relative;min-height:100svh;display:flex;align-items:center;padding:96px 0 56px;overflow:hidden;background:radial-gradient(1200px 800px at 15% -10%, rgba(0,82,190,0.28), transparent 60%), radial-gradient(900px 580px at 95% 88%, rgba(0,102,255,0.07), transparent 60%), linear-gradient(180deg, #000b1a 0%, #020617 55%, #020617 100%);}
+#starfield{position:absolute;inset:0;width:100%;height:100%;z-index:0;}
+.hero__inner{position:relative;z-index:5;width:100%;max-width:var(--wrap);margin:0 auto;padding:0 var(--pad);text-align:center;}
+.airby-logo{display:flex;align-items:center;gap:16px;justify-content:center;}
+.airby-logo img{width:64px;height:64px;border-radius:18px;filter:drop-shadow(0 0 28px rgba(0,132,255,0.5));object-fit:cover; pointer-events:auto;}
+.airby-wordmark{font-size:clamp(42px,7vw,74px);font-weight:800;letter-spacing:-0.035em;line-height:.95;}
+.tagline{font-size:clamp(15.5px,2.35vw,22px);font-weight:700;letter-spacing:.17em;color:#dfe9ff;text-transform:uppercase;}
+.subtag{margin-top:10px;color:var(--muted);font-size:14.5px;font-weight:500;}
+.cta-row{margin-top:30px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;align-items:center;}
+.btn-primary{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:17px 26px;min-height:54px;border-radius:999px;font-weight:700;font-size:16px;color:#fff;background:linear-gradient(180deg,#178aff 0%,#0066ff 100%);box-shadow:0 8px 30px rgba(0,102,255,0.38),0 0 60px rgba(0,102,255,0.18);overflow:hidden;}
+.btn-ghost{display:inline-flex;align-items:center;justify-content:center;padding:17px 24px;min-height:54px;border-radius:999px;font-weight:600;font-size:15.5px;color:#cbd9ef;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.14);backdrop-filter:blur(18px) saturate(160%);}
+.hero-meta{margin-top:16px;font-size:12.7px;color:#6e7d93;}
+.hero-chart-wrap{position:relative;margin-top:44px;width:100%;max-width:980px;margin:auto;}
+.chart-glass{position:relative;z-index:2;border-radius:28px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.11);box-shadow:0 30px 80px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.08);backdrop-filter:blur(32px) saturate(180%); -webkit-backdrop-filter:blur(32px) saturate(180%); overflow:hidden;}
+.chart-topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;color:#8190a8;font-size:12.5px;font-weight:600;border-bottom:1px solid rgba(255,255,255,0.07);}
+.live-dot{width:7px;height:7px;background:#00d188;border-radius:50%;box-shadow:0 0 10px rgba(0,209,136,0.8);display:inline-block;margin-right:7px}
+#heroChart{width:100%;height:268px;display:block;}
+.ticker{background:rgba(7,13,27,0.6);backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06);overflow:hidden;position:relative;z-index:30;}
+.ticker-track{display:flex;gap:44px;white-space:nowrap;width:max-content;animation:tickerScroll 46s linear infinite;padding:13px 0;}
+@keyframes tickerScroll{ from{transform:translateX(0)} to{transform:translateX(-50%)} }
+.tk{display:flex;align-items:center;gap:12px;font-size:13.6px;font-weight:600;color:#c8d4e6;}
+section{padding:86px 0;position:relative}
+.sec-kicker{color:var(--blue2);font-weight:700;font-size:12.8px;letter-spacing:.14em;text-transform:uppercase;}
+.sec-h2{margin:10px 0 12px;font-size:clamp(28px,4.2vw,44px);font-weight:800;line-height:1.08;}
+.sec-lead{color:var(--muted);font-size:16.2px;line-height:1.7;max-width:640px;}
+.features-grid{margin-top:34px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+.fcard{position:relative;background:rgba(255,255,255,0.045);border:1px solid rgba(255,255,255,0.10);border-radius:24px;padding:22px 20px 20px;min-height:196px;backdrop-filter:blur(24px) saturate(160%);transition:transform.22s ease;}
+.fcard:hover{transform:translateY(-4px);}
+.fico{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:rgba(0,102,255,0.12);border:1px solid rgba(0,132,255,0.22);color:#77bdff;margin-bottom:14px}
+.tokens-wrap{margin-top:28px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+.tokcard{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:20px;padding:18px 16px 14px;backdrop-filter:blur(20px) saturate(160%);}
+.how-grid{margin-top:30px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+.step{background:rgba(255,255,255,0.045);border:1px solid rgba(255,255,255,0.10);border-radius:24px;padding:24px 22px;backdrop-filter:blur(22px) saturate(160%);}
+.final-cta{padding:96px 0 88px;position:relative;background:radial-gradient(900px 520px at 50% 15%, rgba(0,72,160,0.19), transparent 70%), linear-gradient(180deg, #020617 0%, #041028 100%);overflow:hidden;text-align:center;}
+.big-dl{display:inline-flex;align-items:center;gap:12px;padding:18px 30px;border-radius:999px;font-weight:800;font-size:17.5px;background:linear-gradient(180deg, #1990ff 0%, #0066ff 100%);color:#fff;box-shadow:0 16px 44px rgba(0,102,255,0.36);}
+footer{border-top:1px solid rgba(255,255,255,0.07);background:rgba(5,10,23,0.6);backdrop-filter:blur(20px);padding:36px 0 42px;color:#7585a0;font-size:14px;}
+.reveal{opacity:0;transform:translateY(16px);transition:opacity.6s ease, transform.6s ease}.reveal.in{opacity:1;transform:none}
+#supportModal{position:fixed;inset:0;z-index:999;display:none;align-items:center;justify-content:center;padding:20px}
+#supportModal.open{display:flex}
+.support-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(18px) saturate(140%);}
+.support-card{position:relative;width:100%;max-width:420px;background:rgba(20,28,48,0.72);border:1px solid rgba(255,255,255,0.14);border-radius:28px;padding:28px 22px;backdrop-filter:blur(36px) saturate(180%);box-shadow:0 30px 90px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);text-align:center;animation:pop.35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{0%{transform:scale(0.88) translateY(14px);opacity:0}100%{transform:scale(1) translateY(0);opacity:1}}
+.support-card img{width:64px;height:64px;border-radius:18px;margin:0 auto 14px;box-shadow:0 0 24px rgba(0,102,255,0.4); pointer-events:auto;}
+.support-email{margin-top:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:12px 14px;font-size:14px;font-weight:700;color:#cfe2ff;word-break:break-all; user-select:text!important; -webkit-user-select:text!important;}
+.support-btn{margin-top:14px;width:100%;padding:14px;border-radius:14px;border:none;font-weight:800;font-size:15px;cursor:pointer}
+.support-btn.primary{background:#0066ff;color:#fff}
+.support-btn.ghost{background:rgba(255,255,255,0.07);color:#cbd9ef;border:1px solid rgba(255,255,255,0.12)}
+@media (max-width:980px){.features-grid{grid-template-columns:repeat(2,1fr)}.tokens-wrap{grid-template-columns:repeat(2,1fr)}.how-grid{grid-template-columns:1fr 1fr}}
+@media (max-width:680px){.features-grid{grid-template-columns:1fr}.tokens-wrap{grid-template-columns:1fr 1fr}.how-grid{grid-template-columns:1fr}.airby-wordmark{font-size:46px} #heroChart{height:210px}}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="topbar__in"><a href="#top" class="brand-mini"><img src="./airby.png" alt="AirBy"><span>Air<span class="by">By</span></span></a><a class="dl-small" id="topDl" href="#" download>Download APK</a></div></header>
+
+<main id="top" class="hero">
+  <canvas id="starfield"></canvas>
+  <div class="hero__inner">
+    <div class="logo-lockup reveal in">
+      <div class="airby-logo"><img src="./airby.png" alt="AirBy Logo"><div class="airby-wordmark">Air<span class="by">By</span></div></div>
+      <div class="tagline">Trade Smarter. Fly Higher.</div>
+      <div class="subtag"><b>Secure</b> • <b>Fast</b> • <b>Reliable</b> • <b id="liveAirbyPrice">Live Market</b></div>
+    </div>
+    <div class="cta-row reveal in"><a class="btn-primary" id="heroDl" href="#" download>Download APK</a><a class="btn-ghost" href="#tokens">Explore Tokens</a></div>
+    <div class="hero-meta" id="heroMeta">Android 4.1+ • Free • Loading... • ~25 MB</div>
+    <div class="hero-chart-wrap reveal in"><div class="chart-glass"><div class="chart-topbar"><span><span class="live-dot"></span><span id="heroTokenName">AIRBY / NGN</span> • Live</span><span>1H • AirBy Coin</span></div><canvas id="heroChart" width="980" height="300"></canvas></div></div>
+  </div>
+</main>
+
+<div class="ticker"><div class="ticker-track" id="tickerTrack"></div></div>
+
+<section id="features"><div class="wrap"><div class="sec-kicker reveal">Built for Nigerian Traders</div><h2 class="sec-h2 reveal">Everything you need to trade with confidence</h2><p class="sec-lead reveal">Real-time prices, instant NGN rails, and a secure wallet — all in one lightweight Android app built for Android 4.1+.</p>
+<div class="features-grid"><article class="fcard reveal"><div class="fico">🔒</div><h3>Secure Wallet</h3><p>Multi-layer encryption and biometric lock. Your funds stay yours.</p></article><article class="fcard reveal"><div class="fico">⚡</div><h3>Lightning Fast</h3><p>Optimized for low-bandwidth networks. Orders fill in milliseconds.</p></article><article class="fcard reveal"><div class="fico">📈</div><h3>Real-time Charts</h3><p>Pro candlesticks and trend lines, smooth at 60fps.</p></article></div></div></section>
+
+<section id="tokens"><div class="wrap"><div class="sec-kicker reveal">Live markets</div><h2 class="sec-h2 reveal">Top tokens on AirBy</h2><p class="sec-lead reveal">Trade the most active NGN pairs.</p><div class="tokens-wrap" id="tokensGrid"></div></div></section>
+
+<section class="final-cta" id="download"><div class="wrap" style="position:relative;z-index:2"><h2>Get AirBy on Android</h2><p style="color:#95a6bd;max-width:560px;margin:0 auto 28px">The fast, secure token trading app built for Nigeria.</p><a class="big-dl" id="bottomDl" href="#" download>Download airby.apk</a><div class="dl-meta" id="dlMeta">Android 4.1+ • ~25 MB • Direct APK Install</div><div style="margin-top:8px;color:#63748c;font-size:12.8px" id="footerVersion">Loading latest build...</div></div></section>
+
+<footer><div class="wrap footer-in"><div id="footerText">© 2026 AirBy Trading Hub — vLoading</div><div style="display:flex;gap:22px"><a href="javascript:void(0)" onclick="openSupport()" style="color:#9fb0c9;font-weight:600">Support</a><a href="#top" style="color:#9fb0c9;font-weight:600">Back to top ↑</a></div></div></footer>
+
+<div id="supportModal">
+  <div class="support-backdrop" onclick="closeSupport()"></div>
+  <div class="support-card">
+    <img src="./airby.png" alt="AirBy">
+    <h3 style="margin:0;font-size:20px;font-weight:800">Contact AirBy Support</h3>
+    <p style="margin:8px 0 0;color:#8a94a7;font-size:13.5px;line-height:1.6">Need help? Our team replies within 2 hours.</p>
+    <div class="support-email">airby.hi.mail@gmail.com</div>
+    <button class="support-btn primary" onclick="emailSupport()">📧 Email Support</button>
+    <button class="support-btn ghost" onclick="closeSupport()">Close</button>
+  </div>
+</div>
+
+<script src="./config.js"></script>
+<script>
+// === BLOCK COPY / LONG PRESS ===
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
+document.addEventListener('dragstart', e => e.preventDefault());
+document.addEventListener('copy', e => e.preventDefault());
+document.addEventListener('cut', e => e.preventDefault());
+
+const SB_URL = window.SUPABASE_URL || window.supabaseConfig?.url;
+const SB_KEY = window.SUPABASE_ANON_KEY || window.supabaseConfig?.anonKey;
+const headers = SB_URL && SB_KEY? { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY } : {};
+function openSupport(){ document.getElementById('supportModal').classList.add('open'); }
+function closeSupport(){ document.getElementById('supportModal').classList.remove('open'); }
+function emailSupport(){ window.location.href = "mailto:airby.hi.mail@gmail.com?subject=AirBy Support Request&body=Hello AirBy Team,%0D%0A%0D%0A"; }
+
+let airbyToken=null, chartCandles=[], latestApkData=null;
+const io = new IntersectionObserver((entries)=>{ entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }) },{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+(function(){ const c=document.getElementById('starfield'); const ctx=c.getContext('2d',{alpha:true}); let w,h,stars=[],dpr=Math.min(devicePixelRatio||1,2); function resize(){ w=c.clientWidth=c.parentElement.clientWidth; h=c.clientHeight=c.parentElement.clientHeight; c.width=w*dpr; c.height=h*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); const count=Math.floor((w*h)/4200); stars=Array.from({length:count},()=>({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.3+0.25,a:Math.random()*0.55+0.25,t:Math.random()*Math.PI*2,s:Math.random()*0.012+0.006}));} function tick(){ ctx.clearRect(0,0,w,h); for(const st of stars){ st.t+=st.s; const a=st.a+Math.sin(st.t)*0.18; ctx.globalAlpha=Math.max(0.15,Math.min(1,a)); ctx.beginPath(); ctx.arc(st.x,st.y,st.r,0,Math.PI*2); ctx.fillStyle='#dbe9ff'; ctx.fill(); } ctx.globalAlpha=1; requestAnimationFrame(tick); } const ro=new ResizeObserver(resize); ro.observe(c.parentElement); resize(); tick(); })();
+
+async function fetchLatestApk(){
+  if(!SB_URL) return;
+  try{
+    const res=await fetch(`${SB_URL}/rest/v1/app_updates?select=*&order=version_code.desc&limit=1`,{headers});
+    const data=await res.json(); if(!Array.isArray(data)||!data.length) return;
+    latestApkData=data[0];
+    document.getElementById('topDl').href=latestApkData.apk_url;
+    document.getElementById('heroDl').href=latestApkData.apk_url;
+    document.getElementById('bottomDl').href=latestApkData.apk_url;
+    document.getElementById('heroMeta').innerText=`Android 4.1+ • Free • v${latestApkData.version_name} • ~25 MB`;
+    document.getElementById('dlMeta').innerText=`Android 4.1+ • v${latestApkData.version_name} • ~25 MB`;
+    document.getElementById('footerVersion').innerText=`v${latestApkData.version_name} • Build ${latestApkData.version_code} • ${new Date(latestApkData.created_at).toLocaleDateString()}`;
+    document.getElementById('footerText').innerText=`© 2026 AirBy Trading Hub — v${latestApkData.version_name}`;
+  }catch(e){}
+}
+function listenApkRealtime(){ try{ const client=supabase.createClient(SB_URL,SB_KEY); client.channel('website-apk-live').on('postgres_changes',{event:'*',schema:'public',table:'app_updates'},()=>fetchLatestApk()).subscribe(); }catch(e){} }
+
+async function fetchTokens(){
+  if(!SB_URL) return;
+  try{
+    const res=await fetch(`${SB_URL}/rest/v1/tokens?status=eq.active&order=updated_at.desc&limit=20`,{headers});
+    const data=await res.json(); if(!Array.isArray(data)||!data.length) return;
+    airbyToken=data.find(t=>t.symbol.toLowerCase().includes('airby')||t.name.toLowerCase().includes('airby'))||data[0];
+    document.getElementById('liveAirbyPrice').textContent=`${airbyToken.name} • ₦${Number(airbyToken.current_price).toLocaleString()}`;
+    document.getElementById('heroTokenName').textContent=`${airbyToken.symbol} / NGN`;
+    renderTokens(data); renderTicker(data);
+  }catch(e){}
+}
+function renderTokens(tokens){ const grid=document.getElementById('tokensGrid'); grid.innerHTML=''; tokens.slice(0,8).forEach((t)=>{ const card=document.createElement('article'); card.className='tokcard reveal'; card.innerHTML=`<div style="display:flex;justify-content:space-between"><div><div style="font-weight:800">${t.symbol}/NGN</div><div style="color:#7c8ba3;font-size:12px">${t.name}</div></div><div style="width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,0.06);display:grid;place-items:center;font-weight:800">${t.symbol.slice(0,2)}</div></div><div style="margin-top:12px"><span style="font-size:20px;font-weight:800">₦${Number(t.current_price).toLocaleString()}</span></div>`; grid.appendChild(card); io.observe(card); }); }
+function renderTicker(tokens){ const track=document.getElementById('tickerTrack'); track.innerHTML=''; [...tokens,...tokens].forEach(t=>{ const el=document.createElement('div'); el.className='tk'; el.innerHTML=`<span style="font-weight:700;color:#eaf2ff">${t.symbol}</span><span style="color:#9fb0c8">₦${Number(t.current_price).toLocaleString()}</span><span style="color:var(--green)">Live</span>`; track.appendChild(el); }); }
+
+fetchTokens(); fetchLatestApk(); listenApkRealtime();
+setInterval(fetchTokens,5000);
+</script>
+</body>
+</html>
